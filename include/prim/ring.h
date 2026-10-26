@@ -10,6 +10,7 @@
 #include <type_traits>
 
 #include "prim/alloc.h"
+#include "prim/assert.h"
 
 namespace prim {
 
@@ -48,9 +49,12 @@ class Ring : RingCore {
   uint32_t size() const { return n_; }
   uint32_t capacity() const { return cap_; }
   bool empty() const { return !n_; }
-  T& operator[](uint32_t i) const { return *static_cast<T*>(at(i, sizeof(T))); }  // 0 is the oldest
-  T* oldest() const { return n_ ? &(*this)[0] : nullptr; }
-  T* newest() const { return n_ ? &(*this)[n_ - 1u] : nullptr; }
+  T& operator[](uint32_t i) const {  // 0 is the oldest; unchecked but for PRIM_ASSERT
+    PRIM_ASSERT(i < n_);
+    return *static_cast<T*>(at(i, sizeof(T)));
+  }
+  T* oldest() const { return n_ ? static_cast<T*>(at(0, sizeof(T))) : nullptr; }
+  T* newest() const { return n_ ? static_cast<T*>(at(n_ - 1u, sizeof(T))) : nullptr; }
 
   bool push(const T& x) {
     void* p = RingCore::push(sizeof(T));

@@ -11,6 +11,7 @@
 #include <type_traits>
 
 #include "prim/alloc.h"
+#include "prim/assert.h"
 #include "prim/sort.h"
 
 namespace prim {
@@ -43,16 +44,25 @@ class Vec : VecCore {
   bool empty() const { return !n_; }
   T* begin() const { return reinterpret_cast<T*>(d_); }
   T* end() const { return begin() + n_; }
-  T& operator[](uint32_t i) const { return begin()[i]; }
+  T& operator[](uint32_t i) const {  // unchecked but for PRIM_ASSERT
+    PRIM_ASSERT(i < n_);
+    return begin()[i];
+  }
 
   bool push(const T& x) { return insert(n_, x); }
-  bool insert(uint32_t i, const T& x) {
-    void* p = open(i, sizeof(T));
+  bool insert(uint32_t i, const T& x) {  // false for i past the end, or when full or out of memory
+    const bool in = i <= n_;
+    PRIM_ASSERT(in);
+    void* p = in ? open(i, sizeof(T)) : nullptr;
     if (p) std::memcpy(p, &x, sizeof(T));
     return p != nullptr;
   }
-  void erase(uint32_t i) { close(i, sizeof(T), false); }
-  void erase_swap(uint32_t i) { close(i, sizeof(T), true); }
+  void erase(uint32_t i) {  // nothing for i past the end
+    if (held(i)) close(i, sizeof(T), false);
+  }
+  void erase_swap(uint32_t i) {
+    if (held(i)) close(i, sizeof(T), true);
+  }
   void clear() { n_ = 0; }
   template <class Less>
   void sort(Less less) {
@@ -72,6 +82,13 @@ class Vec : VecCore {
       }
     }
     return lo;
+  }
+
+ private:
+  bool held(uint32_t i) const {
+    const bool in = i < n_;
+    PRIM_ASSERT(in);
+    return in;
   }
 };
 

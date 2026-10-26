@@ -1,11 +1,12 @@
 #include <cstdio>
 #include <cstdlib>
 
+// First, so that this file and the tests see one PRIM_ASSERT.
+#include "check.h"
 #include "esp_heap_caps.h"
 #include "esp_memory_utils.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "prim/arena.h"
 #include "sdkconfig.h"
 
 int prim_run(const char* only);

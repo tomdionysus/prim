@@ -8,6 +8,22 @@
 #include <cstdio>
 #include <cstdlib>
 
+// Every test file includes this first, so the library's assertions count here
+// instead of doing nothing: a case that breaks a rule on purpose says how
+// many it expects with CHECK_ASSERTS, and one that fires any it did not
+// expect fails (main.cpp).
+namespace check {
+inline int& asserts() {
+  static int n = 0;
+  return n;
+}
+inline int& claimed() {
+  static int n = 0;
+  return n;
+}
+}  // namespace check
+#define PRIM_ASSERT(c) ((c) ? void(0) : void(++::check::asserts()))
+
 #include "prim/arena.h"
 
 namespace check {
@@ -102,3 +118,13 @@ struct Failing final : prim::Alloc {
   } while (0)
 
 #define CHECK_EQ(a, b) CHECK((a) == (b))
+
+// Runs the statements and checks that they fired exactly n of the library's
+// assertions, which the case then owns.
+#define CHECK_ASSERTS(n, ...)                        \
+  do {                                               \
+    const int check_before_ = ::check::asserts();    \
+    __VA_ARGS__;                                     \
+    CHECK_EQ(::check::asserts() - check_before_, n); \
+    ::check::claimed() += (n);                       \
+  } while (0)

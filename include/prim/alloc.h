@@ -1,15 +1,17 @@
 #pragma once
 
-// What every primitive that holds memory allocates from. An Arena is one; a
-// test wraps one to fail on demand. Sizes are 32-bit: nothing here is bigger.
+// What every primitive that holds memory allocates from. An Arena is one, a
+// Pool another; a test wraps one to fail on demand. Sizes are 32-bit:
+// nothing here is bigger.
 //
 // Memory comes in two kinds. Fast is internal RAM: what every frame or every
 // poll touches, and anything an interrupt or a cache-off window reads, goes
 // there. Bulk is whatever else there is, PSRAM on a board that has it. A
-// request for Bulk is a preference, met from fast memory if there is no bulk,
-// so on a board with only internal RAM the kind is ignored. A request for
-// Fast is a requirement: it is refused rather than met from bulk, so a hot
-// structure never lands in slow memory by the luck of the moment.
+// request for Bulk is a preference, met from fast memory if there is no
+// bulk (above the arena's fast reserve, if it has one), so on a board with
+// only internal RAM the kind is ignored. A request for Fast is a
+// requirement: it is refused rather than met from bulk, so a hot structure
+// never lands in slow memory by the luck of the moment.
 
 #include <cstdint>
 
