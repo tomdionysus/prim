@@ -4,13 +4,3 @@ sdkconfig.old
 coverage.txt
 .vscode/
 .DS_Store
-
-# Personal agent rules, not shared with the repo
-CLAUDE.local.md
-AGENTS.local.md
-
-.basemind/
-.claude/worktrees/
-__pycache__/
-*.pyc
-.claude/settings.local.json
