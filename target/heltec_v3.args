@@ -1,0 +1,3 @@
+-B build/heltec_v3
+-DSDKCONFIG=build/heltec_v3/sdkconfig
+-DSDKCONFIG_DEFAULTS=sdkconfig.defaults;sdkconfig.heltec_v3

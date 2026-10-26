@@ -1,0 +1,3 @@
+# basemind configuration. Lives at the repo root and is committed; the index
+# is derived state in ~/.local/share/basemind/, nothing is written here.
+"$schema" = "v1"

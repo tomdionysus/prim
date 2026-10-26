@@ -1,0 +1,11 @@
+CONFIG_PRIM_BOARD_TDECK=y
+
+# ESP32-S3FN16R8: 16 MB flash, 8 MB octal SPI PSRAM. The test app gives the
+# arena PSRAM as bulk memory and internal RAM as fast.
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="16MB"
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_OCT=y
+
+# Native USB, as on the Heltec V4: the console goes to USB-serial-JTAG.
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y

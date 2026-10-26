@@ -1,0 +1,3 @@
+-B build/tdeck
+-DSDKCONFIG=build/tdeck/sdkconfig
+-DSDKCONFIG_DEFAULTS=sdkconfig.defaults;sdkconfig.tdeck
