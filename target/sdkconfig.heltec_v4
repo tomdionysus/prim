@@ -1,0 +1,11 @@
+CONFIG_PRIM_BOARD_HELTEC_V4=y
+
+# ESP32-S3R2: 16 MB flash, 2 MB quad SPI PSRAM (V4 datasheet Rev 1.4). The
+# test app gives the arena PSRAM as bulk memory and internal RAM as fast.
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="16MB"
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_QUAD=y
+
+# Native USB (usbmodem), not a CP2102: the console goes to USB-serial-JTAG.
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y

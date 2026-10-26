@@ -1,0 +1,19 @@
+# Common defaults for the test app on every board. A board's file
+# (sdkconfig.heltec_v3, sdkconfig.heltec_v4, sdkconfig.tdeck) is layered on
+# top by its .args file.
+
+CONFIG_IDF_TARGET="esp32s3"
+
+# Baseline is the Heltec V3 (ESP32-S3FN8, 8 MB flash, no PSRAM).
+CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="8MB"
+
+# The suite with its std:: oracles is larger than the 1 MB default app slot.
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y
+
+CONFIG_BOOTLOADER_LOG_LEVEL_WARN=y
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+CONFIG_FREERTOS_HZ=1000
+
+# The suite runs in its own task (app.cpp); the main task only starts it.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=4096

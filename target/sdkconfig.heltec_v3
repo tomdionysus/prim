@@ -1,0 +1,4 @@
+CONFIG_PRIM_BOARD_HELTEC_V3=y
+
+# ESP32-S3FN8: 8 MB flash, no PSRAM, so every arena area is fast memory.
+# Console on UART0 through the board's CP2102 (the default).
