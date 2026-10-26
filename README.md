@@ -248,7 +248,7 @@ class Arena final : public Alloc {
   uint32_t free_bytes() const;    // over both kinds
   uint32_t used_bytes() const;
   uint32_t largest_free() const;
-  uint32_t blocks() const;        // free blocks, over both kinds
+  uint32_t blocks() const;        // blocks, allocated and free, over both kinds
   uint32_t bad_frees() const;     // frees or resizes of what was not allocated: refused and counted
   uint32_t failures() const;      // allocations refused for want of memory
   int check() const;
