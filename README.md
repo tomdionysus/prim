@@ -1008,11 +1008,6 @@ the two clock reads around it included:
 | V4 | 94 ns | 4 fast, 103 bulk | 39 | 0 |
 | V3 | 102 ns | 117 | 42 | 0 |
 
-`.github/workflows/ci.yml` runs all of this on every push: the host suite
-under the sanitizers, at every optimisation level and alignment and under
-seven seeds; the soak; coverage; the test app built for each of the three
-boards in ESP-IDF's container; and the suite under QEMU.
-
 ## Boards
 
 `target/` is an ESP-IDF project that builds the suite as an application for
