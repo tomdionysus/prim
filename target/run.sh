@@ -27,7 +27,7 @@ log=$build/run.log
 if [[ $# -eq 0 ]]; then
   size=$(sed -n 's/^CONFIG_ESPTOOLPY_FLASHSIZE="\(.*\)"/\1/p' "$build/sdkconfig")
   (cd "$build" && esptool.py --chip esp32s3 merge_bin --fill-flash-size "$size" -o flash.bin @flash_args >/dev/null)
-  qemu=$(find "$HOME/.espressif/tools/qemu-xtensa" -name qemu-system-xtensa -type f | head -1)
+  qemu=$(find "${IDF_TOOLS_PATH:-$HOME/.espressif}/tools/qemu-xtensa" -name qemu-system-xtensa -type f | head -1)
   timeout 900 "$qemu" -nographic -machine esp32s3 -drive "file=$build/flash.bin,if=mtd,format=raw" \
     > "$log" 2>&1 &
   pid=$!
