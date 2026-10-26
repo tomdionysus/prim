@@ -10,6 +10,8 @@
 
 #include <cstdint>
 
+#include "prim/assert.h"
+
 namespace prim {
 
 struct RbNode {
@@ -50,9 +52,16 @@ class Tree {
   T* next(const T& x) const { return obj(rb_step(hook(x), 1)); }
   T* prev(const T& x) const { return obj(rb_step(hook(x), 0)); }
   static bool linked(const T& x) { return rb_linked(hook(x)); }
-  void remove(T& x) { rb_erase(t_, hook(x)); }
+  void remove(T& x) {  // a node in no tree is left alone
+    const bool on = linked(x);
+    PRIM_ASSERT(on);
+    if (on) rb_erase(t_, hook(x));
+  }
 
-  void insert(T& x) {
+  void insert(T& x) {  // a node in a tree already is refused
+    const bool unlinked = !linked(x);
+    PRIM_ASSERT(unlinked);
+    if (!unlinked) return;
     RbNode* p = nullptr;
     int side = 0;
     for (RbNode* n = t_.root; n; n = n->c[side]) {

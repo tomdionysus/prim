@@ -68,6 +68,7 @@ class TrieCore {
 template <class V>
 class Trie : TrieCore {
  public:
+  static constexpr uint32_t kNodeSize = sizeof(TrieCore::Node);  // what each node allocates, for a Pool
   explicit Trie(Alloc& a) : TrieCore(a) {}
   bool insert(uint64_t key, uint8_t len, V& v) { return TrieCore::insert(key, len, &v); }
   V* remove(uint64_t key, uint8_t len) { return static_cast<V*>(TrieCore::remove(key, len)); }

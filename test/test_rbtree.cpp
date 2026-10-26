@@ -195,7 +195,7 @@ void on_tick(prim::Timer& t) {
   Owner* o = &static_cast<Owner&>(static_cast<prim::TimerHook<Tick>&>(t));
   ++o->fired;
   o->last = t.at;
-  if (o->fired == 1) o->q->arm(t, t.at + 10);  // re-armed from within: fires again if still due
+  if (o->fired == 1) o->q->arm(t, t.at + 10);  // re-armed from within: fires on a later run
 }
 void on_tock(prim::Timer& t) {
   Owner* o = &static_cast<Owner&>(static_cast<prim::TimerHook<Tock>&>(t));

@@ -9,7 +9,13 @@ int prim_run(const char* only) {
   for (check::Case* c = check::head(); c; c = c->next) {
     if (only && !std::strstr(c->name, only)) continue;
     const int before = check::failures();
+    const int asserted = check::asserts() - check::claimed();
     c->fn();
+    if (check::asserts() - check::claimed() != asserted) {
+      std::printf("  FAIL %s: %d assertion(s) it did not expect\n", c->name, check::asserts() - check::claimed() - asserted);
+      check::claimed() = check::asserts();
+      ++check::failures();
+    }
     std::printf("  %s %s\n", check::failures() == before ? "ok  " : "FAIL", c->name);
     ++run;
   }

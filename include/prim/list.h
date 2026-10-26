@@ -7,6 +7,8 @@
 
 #include <cstdint>
 
+#include "prim/assert.h"
+
 namespace prim {
 
 struct Link {
@@ -30,25 +32,33 @@ class List {
   T* next(const T& x) const { return at(hook(x)->next); }  // nullptr after the back
   T* prev(const T& x) const { return at(hook(x)->prev); }  // nullptr before the front
 
-  void push_front(T& x) { join(&head_, hook(x)); }
-  void push_back(T& x) { join(head_.prev, hook(x)); }
-  void insert_after(T& at, T& x) { join(hook(at), hook(x)); }
-  void move_front(T& x) {
-    remove(x);
-    push_front(x);
+  // An object already on a list is refused, as is a place that is on none.
+  void push_front(T& x) {
+    if (fresh(x)) join(&head_, hook(x));
+  }
+  void push_back(T& x) {
+    if (fresh(x)) join(head_.prev, hook(x));
+  }
+  void insert_after(T& at, T& x) {
+    const bool placed = linked(at);
+    PRIM_ASSERT(placed);
+    if (placed && fresh(x)) join(hook(at), hook(x));
+  }
+  void move_front(T& x) {  // from wherever it is, or from no list
+    if (linked(x)) unlink(hook(x));
+    join(&head_, hook(x));
   }
   T* pop_front() {
     T* x = front();
-    if (x) remove(*x);
+    if (x) unlink(hook(*x));
     return x;
   }
 
   static bool linked(const T& x) { return hook(x)->next != nullptr; }
-  static void remove(T& x) {
-    Link* l = hook(x);
-    l->prev->next = l->next;
-    l->next->prev = l->prev;
-    l->next = l->prev = nullptr;
+  static void remove(T& x) {  // an object on no list is left alone
+    const bool on = linked(x);
+    PRIM_ASSERT(on);
+    if (on) unlink(hook(x));
   }
 
   uint32_t size() const {
@@ -61,6 +71,16 @@ class List {
   // Reference casts: neither side can be null, so no null test is compiled in.
   static Link* hook(const T& x) { return &const_cast<ListHook<Tag>&>(static_cast<const ListHook<Tag>&>(x)); }
   T* at(Link* l) const { return l == &head_ ? nullptr : &static_cast<T&>(static_cast<ListHook<Tag>&>(*l)); }
+  static bool fresh(const T& x) {
+    const bool unlinked = !linked(x);
+    PRIM_ASSERT(unlinked);
+    return unlinked;
+  }
+  static void unlink(Link* l) {
+    l->prev->next = l->next;
+    l->next->prev = l->prev;
+    l->next = l->prev = nullptr;
+  }
   static void join(Link* after, Link* l) {
     l->prev = after;
     l->next = after->next;

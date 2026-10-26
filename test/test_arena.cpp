@@ -54,7 +54,9 @@ bool tiles(const Arena& a, const void* area, uint32_t len) {
     if (bool(*h & Arena::kPrevUsed) != prev_used) return false;
     bool listed = false;
     for (prim::Mem k : {prim::Mem::Bulk, prim::Mem::Fast}) {
-      for (const Free* f = a.free_list(k); f; f = f->next) listed = listed || &f->head == h;
+      for (int b = 0; b < Arena::kBins; ++b) {
+        for (const Free* f = a.free_list(k, b); f; f = f->next) listed = listed || &f->head == h;
+      }
     }
     if (used == listed) return false;
     if (!used && *reinterpret_cast<const Word*>(reinterpret_cast<const char*>(h) + c) != c) return false;
@@ -163,7 +165,8 @@ TEST(arena_a_split_keeps_every_block_in_place) {
   for (auto& x : p) x = s.a.alloc(200);
   s.a.free(p[1]);
   s.a.free(p[3]);
-  CHECK(s.a.alloc(64) == p[1]);  // first fit: the lower hole, from its head
+  void* q = s.a.alloc(64);  // from the head of a hole: the class above 64 holds both
+  CHECK(q == p[1] || q == p[3]);
   CHECK_EQ(s.a.check(), 0);
   CHECK(tiles(s));
 }
@@ -284,8 +287,7 @@ TEST(arena_bad_frees_and_absurd_sizes_are_refused) {
   void* q = s.a.alloc(0);  // a block of its own
   CHECK(q && q != p && s.a.size_of(q) == Arena::capacity_for(0));
   s.a.free(p);
-  s.a.free(p);
-  CHECK(s.a.resize(p, 50) == nullptr);
+  CHECK_ASSERTS(2, s.a.free(p); CHECK(s.a.resize(p, 50) == nullptr));
   CHECK_EQ(s.a.bad_frees(), 2u);
   CHECK(s.a.alloc(0xFFFFFFFFu) == nullptr);
   CHECK(s.a.resize(q, 0xFFFFFFFFu) == nullptr);
@@ -339,39 +341,61 @@ TEST(arena_resize_with_only_free_space_before_it) {
 }
 
 TEST(arena_check_finds_each_kind_of_damage) {
-  for (int kind = 1; kind <= 10; ++kind) {
+  for (int kind = 1; kind <= 11; ++kind) {
     if (kind == 10 && A <= 8) continue;  // at 8, every capacity is a block's size
     Small s(4096);
     void* m[5];
     for (auto& x : m) x = s.a.alloc(64);
     s.a.free(m[1]);
-    s.a.free(m[3]);  // the list: m1, m3, the rest
-    Free* first = const_cast<Free*>(s.a.free_list(prim::Mem::Bulk));
+    s.a.free(m[3]);  // one class holds m3 then m1; the rest is in the top one
+    const int bin = Arena::bin_of(Arena::capacity_for(64));
+    Free* first = const_cast<Free*>(s.a.free_list(prim::Mem::Bulk, bin));
     Free* second = first->next;
-    Free* third = second->next;
+    Free* rest = reinterpret_cast<Free*>(static_cast<char*>(m[4]) + Arena::capacity_for(64));
     int want = kind;
     switch (kind) {
       case 1: first->next = reinterpret_cast<Free*>(reinterpret_cast<char*>(second) + 1); break;
       case 2: second->head |= Arena::kUsed; break;
-      case 3: second->head |= Arena::kFast; break;  // marked fast on the bulk list
-      case 4: third->prev = first; break;
-      case 5:  // third before second
-        first->next = third, third->prev = first, third->next = second, second->prev = third, second->next = nullptr;
-        break;
-      case 6: *foot_of(second) = 0; break;
-      case 7: {  // the rest cut short behind a false sentinel: the free total no longer adds up
-        const uint32_t c = cap_of(third) - A;
-        third->head = Arena::pack(c) | (third->head & Arena::kPrevUsed);
-        *foot_of(third) = c;
-        *after(third) = Arena::kUsed;
+      case 3: second->head |= Arena::kFast; break;  // marked fast on a bulk list
+      case 4: second->prev = second; break;
+      case 5: {  // m4 marked free and grown over the rest: free right after m3, unmerged
+        Free* r = reinterpret_cast<Free*>(static_cast<char*>(m[4]) - H);
+        const uint32_t c = cap_of(rest) + H + Arena::capacity_for(64);
+        r->head = Arena::pack(c);
+        *foot_of(r) = c;
         break;
       }
-      case 8: *after(second) |= Arena::kPrevUsed, want = 6; break;      // the next block's mark
+      case 6: *foot_of(second) = 0; break;
+      case 7: {  // the rest cut short behind a false sentinel: the free total no longer adds up
+        const uint32_t c = cap_of(rest) - A;
+        rest->head = Arena::pack(c) | (rest->head & Arena::kPrevUsed);
+        *foot_of(rest) = c;
+        *after(rest) = Arena::kUsed;
+        break;
+      }
+      case 8: *after(second) |= Arena::kPrevUsed, want = 6; break;                       // the next block's mark
       case 9: second->head = Arena::pack(M - H - A) | Arena::kPrevUsed, want = 2; break;  // too small for a block
-      case 10: second->head -= 8, want = 2; break;                       // not a block's size
+      case 10: second->head -= 8, want = 2; break;                                       // not a block's size
+      case 11: {  // m3 cut to the smallest block behind a false sentinel: now in the wrong class
+        const uint32_t c = M - H;
+        first->head = Arena::pack(c) | (first->head & Arena::kPrevUsed);
+        *foot_of(first) = c;
+        *after(first) = Arena::kUsed;
+        want = 8;
+        break;
+      }
     }
     CHECK_EQ(s.a.check(), want);
   }
+  // A block listed outside the memory the arena was given.
+  Small s(4096);
+  void* m[3];
+  for (auto& x : m) x = s.a.alloc(64);
+  s.a.free(m[1]);
+  alignas(64) static Word stray[16];
+  Free* f = const_cast<Free*>(s.a.free_list(prim::Mem::Bulk, Arena::bin_of(Arena::capacity_for(64))));
+  f->next = reinterpret_cast<Free*>(reinterpret_cast<char*>(stray + 8) - H);
+  CHECK_EQ(s.a.check(), 1);
 }
 
 TEST(arena_check_finds_free_blocks_left_unmerged) {
@@ -379,12 +403,13 @@ TEST(arena_check_finds_free_blocks_left_unmerged) {
   void* m[3];
   for (auto& x : m) x = s.a.alloc(64);
   s.a.free(m[0]);
-  s.a.free(m[2]);  // the list: m0, then m2 merged with the rest
-  Free* first = const_cast<Free*>(s.a.free_list(prim::Mem::Bulk));
-  const uint32_t c = uint32_t(reinterpret_cast<char*>(first->next) - reinterpret_cast<char*>(first)) - H;
-  first->head = Arena::pack(c) | (first->head & Arena::kPrevUsed);  // m0 now reaches the next free block
+  s.a.free(m[2]);  // m0 free, m1 allocated, m2 merged with the rest
+  Free* first = const_cast<Free*>(s.a.free_list(prim::Mem::Bulk, Arena::bin_of(Arena::capacity_for(64))));
+  Word* rest = reinterpret_cast<Word*>(static_cast<char*>(m[2]) - H);
+  const uint32_t c = uint32_t(reinterpret_cast<char*>(rest) - reinterpret_cast<char*>(first)) - H;
+  first->head = Arena::pack(c) | (first->head & Arena::kPrevUsed);  // m0 now reaches the free rest
   *foot_of(first) = c;
-  first->next->head &= ~Arena::kPrevUsed;  // which is marked as it would be
+  *rest &= ~Arena::kPrevUsed;  // which is marked as it would be
   CHECK_EQ(s.a.check(), 5);
 }
 
@@ -462,7 +487,7 @@ TEST(account_gives_a_container_its_kind_and_counts_what_its_owner_holds) {
   CHECK(cold.resize(q, 0xFFFFFFFFu) == nullptr);  // refused: nothing changes
   CHECK_EQ(cold.objects(), 2u);
   cold.free(q);
-  cold.free(q);                                   // a bad free counts nothing
+  CHECK_ASSERTS(1, cold.free(q));                 // a bad free counts nothing
   cold.free(nullptr);
   CHECK(cold.objects() == 1 && cold.bytes() == a.size_of(u.begin()));
   CHECK(cold.peak() > cold.bytes());

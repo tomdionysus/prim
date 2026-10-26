@@ -37,6 +37,8 @@ struct NameTr {
   static bool eq(const Key& a, const Key& b) { return std::strcmp(a, b) == 0; }
 };
 
+using ByIdTable = prim::Hash<Obj, IdTr, ById>;
+
 }  // namespace
 
 TEST(siphash_matches_the_reference_vectors) {
@@ -50,12 +52,12 @@ TEST(siphash_matches_the_reference_vectors) {
   bool ok = true;
   for (uint32_t len = 0; len < 16; ++len) ok = ok && prim::halfsiphash(msg, len, key) == want[len];
   CHECK(ok);
-  // The table's key is the one seeded.
-  prim::hash_seed(key);
+  // The table's key is the one seeded, once: a second seed changes nothing.
+  CHECK(prim::hash_seed(key));
   CHECK_EQ(prim::hash32(msg, 5), want[5]);
   const uint8_t zero[8] = {};
-  prim::hash_seed(zero);
-  CHECK(prim::hash32(msg, 5) != want[5]);
+  CHECK(!prim::hash_seed(zero));
+  CHECK_EQ(prim::hash32(msg, 5), want[5]);
 }
 
 TEST(hash_each_operation) {
@@ -92,22 +94,38 @@ TEST(hash_grows_and_survives_failing_growth) {
     CHECK(!t.insert(o));
     CHECK_EQ(t.size(), 0u);
   }
-  check::Failing f(h.a, 1, true);  // the first succeeds, every later growth fails
-  prim::Hash<Obj, IdTr, ById> t(f);
   Obj o[40];
-  bool ok = true;
-  for (int i = 0; i < 40; ++i) {
-    o[i].id = uint64_t(i) * 0x100000001ull;
-    ok = ok && t.insert(o[i]);
+  {
+    check::Failing f(h.a, 1, true);  // the first succeeds, every later growth fails
+    prim::Hash<Obj, IdTr, ById> t(f);
+    bool ok = true;
+    for (int i = 0; i < 40; ++i) {
+      o[i].id = uint64_t(i) * 0x100000001ull;
+      ok = ok && t.insert(o[i]);
+    }
+    CHECK(ok);
+    CHECK_EQ(t.buckets(), 4u);  // never grew: long chains, all still found
+    // It tried at 8 objects, then only as the count doubled: at 16 and 32.
+    CHECK_EQ(f.calls, 4);
+    for (int i = 0; i < 40; ++i) ok = ok && t.find(o[i].id) == &o[i];
+    CHECK(ok);
+    CHECK(ByIdTable::linked(o[0]));
+    prim::Hash<Obj, IdTr, ById> other(h.a);
+    CHECK_ASSERTS(1, CHECK(!other.insert(o[0])));  // in a table already: refused
+    Obj spare;
+    spare.id = 5;
+    other.insert(spare);
+    CHECK(!other.remove(o[0]));  // in a table, but not this one
+    other.remove(spare);
   }
-  CHECK(ok);
-  CHECK_EQ(t.buckets(), 4u);  // never grew: long chains, all still found
-  for (int i = 0; i < 40; ++i) ok = ok && t.find(o[i].id) == &o[i];
-  CHECK(ok);
+  CHECK(!ByIdTable::linked(o[0]));  // the table let them go as it went
   check::Heap h2;
   prim::Hash<Obj, IdTr, ById> g(h2.a);
   for (int i = 0; i < 40; ++i) g.insert(o[i]);
   CHECK_EQ(g.buckets(), 32u);  // two an object: 4, 8, 16, 32
+  CHECK(!g.find_next(o[0]) || g.find_next(o[0])->id == o[0].id);
+  Obj loose;
+  CHECK(!g.find_next(loose));  // in no table: nothing after it
 }
 
 TEST(hash_an_object_in_two_tables_and_one_bucket) {
