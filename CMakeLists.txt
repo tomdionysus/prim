@@ -10,6 +10,7 @@
 #
 #   cmake -S . -B build/host && cmake --build build/host && ./build/host/prim_tests
 #   ./coverage.sh             line and branch coverage of each header
+#   ./build/host/prim_soak    a simulated day of a node's memory
 #   target/run.sh             the suite on the ESP32-S3, under QEMU or on a board
 
 if(ESP_PLATFORM)
@@ -51,4 +52,11 @@ if(PRIM_TESTS)
   add_executable(prim_example ${CMAKE_CURRENT_LIST_DIR}/example.cpp)
   target_compile_options(prim_example PRIVATE ${PRIM_FLAGS})
   target_link_libraries(prim_example PRIVATE prim)
+endif()
+
+if(PRIM_TESTS)
+  # A simulated day of a node's memory (bench/soak.cpp): prim_soak [v3|v4].
+  add_executable(prim_soak ${CMAKE_CURRENT_LIST_DIR}/bench/soak.cpp)
+  target_compile_options(prim_soak PRIVATE ${PRIM_FLAGS})
+  target_link_libraries(prim_soak PRIVATE prim)
 endif()
