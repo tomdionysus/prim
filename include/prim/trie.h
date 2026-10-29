@@ -11,6 +11,7 @@
 #include <initializer_list>
 
 #include "prim/alloc.h"
+#include "prim/bits.h"
 
 namespace prim {
 
@@ -42,7 +43,7 @@ class TrieCore {
   // How many top bits a and b share, at most lim.
   static uint8_t common(uint64_t a, uint64_t b, uint8_t lim) {
     const uint64_t x = a ^ b;
-    const uint8_t c = x ? uint8_t(__builtin_clzll(x)) : 64;
+    const uint8_t c = x ? uint8_t(clz64(x)) : 64;
     return c < lim ? c : lim;
   }
   // The slot that holds the node for (key, len), or the empty slot where it would go,

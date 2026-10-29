@@ -62,8 +62,8 @@ TEST(siphash_matches_the_reference_vectors) {
 
 TEST(hash_each_operation) {
   check::Heap h;
+  Obj o[3];  // before the table, so they outlive it
   prim::Hash<Obj, IdTr, ById> t(h.a);
-  Obj o[3];
   CHECK(!t.find(1));
   CHECK(!t.remove(o[0]));  // no buckets yet
   for (int i = 0; i < 3; ++i) {
@@ -130,9 +130,9 @@ TEST(hash_grows_and_survives_failing_growth) {
 
 TEST(hash_an_object_in_two_tables_and_one_bucket) {
   check::Heap h;
+  Obj o[6];  // before the tables, so they outlive them
   prim::Hash<Obj, CollideTr, ById> by_id(h.a);
   prim::Hash<Obj, NameTr, ByName> by_name(h.a);
-  Obj o[6];
   for (int i = 0; i < 6; ++i) {
     o[i].id = uint64_t(i);
     o[i].name[0] = char('a' + i);
@@ -176,8 +176,8 @@ TEST(hash_random_against_std) {
 
 TEST(hash_several_objects_may_share_a_key) {
   check::Heap h;
+  Obj o[5];  // before the table, so they outlive it: its destructor lets them go
   prim::Hash<Obj, CollideTr, ById> t(h.a);  // one bucket: other keys sit between
-  Obj o[5];
   for (int i = 0; i < 5; ++i) {
     o[i].id = uint64_t(i % 2);  // ids 0 1 0 1 0
     t.insert(o[i]);

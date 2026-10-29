@@ -9,6 +9,7 @@ namespace prim {
 
 template <class T, class Less>
 void sort(T* begin, T* end, Less less) {
+  if (end - begin < 2) return;  // else begin + 1 would pass the end, or a null begin
   for (T* i = begin + 1; i < end; ++i) {
     T x = *i;
     T* j = i;

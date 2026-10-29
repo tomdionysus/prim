@@ -160,28 +160,37 @@ TEST(pool_each_operation) {
 }
 
 TEST(pool_random_against_std) {
-  check::Heap h;
-  prim::Pool p(h.a, 40, 8);
-  std::vector<unsigned char*> live;
-  check::Rng rng(8);
-  bool ok = true;
-  for (int op = 0; op < 20000 && ok; ++op) {
-    if (live.empty() || rng.below(2)) {
-      auto* o = static_cast<unsigned char*>(p.get());
-      ok = o != nullptr;
-      for (int i = 0; ok && i < 40; ++i) o[i] = static_cast<unsigned char>(reinterpret_cast<uintptr_t>(o) + i);
-      live.push_back(o);
-    } else {
-      const uint32_t i = rng.below(uint32_t(live.size()));
-      unsigned char* o = live[i];
-      for (int j = 0; j < 40; ++j) ok = ok && o[j] == static_cast<unsigned char>(reinterpret_cast<uintptr_t>(o) + j);
-      ok = ok && p.put(o);
-      live[i] = live.back();
-      live.pop_back();
+  // Sizes with every power of two the index arithmetic shifts by, and odd
+  // parts from 1 to 125, whose inverses it multiplies by.
+  for (uint32_t size : {8u, 24u, 40u, 56u, 256u, 1000u}) {
+    check::Heap h;
+    prim::Pool p(h.a, size, 8);
+    CHECK_EQ(p.size(), size);
+    std::vector<unsigned char*> live;
+    check::Rng rng(8 + size);
+    bool ok = true;
+    for (int op = 0; op < 20000 && ok; ++op) {
+      // At most 24 KB out, so the run fits the S3 app's smaller test heap.
+      if (live.empty() || (live.size() * size < 24 * 1024 && rng.below(2))) {
+        auto* o = static_cast<unsigned char*>(p.get());
+        ok = o != nullptr;
+        for (uint32_t i = 0; ok && i < size; ++i) o[i] = static_cast<unsigned char>(reinterpret_cast<uintptr_t>(o) + i);
+        live.push_back(o);
+      } else {
+        const uint32_t i = rng.below(uint32_t(live.size()));
+        unsigned char* o = live[i];
+        for (uint32_t j = 0; j < size; ++j) ok = ok && o[j] == static_cast<unsigned char>(reinterpret_cast<uintptr_t>(o) + j);
+        // Inside the object, which no other slab can reach: never an object.
+        const uint32_t in = 1 + rng.below(size - 1);
+        ok = ok && !p.put(o + in) && p.size_of(o + in) == 0 && p.size_of(o) == size;
+        ok = ok && p.put(o);
+        live[i] = live.back();
+        live.pop_back();
+      }
+      ok = ok && p.in_use() == live.size() && h.a.check() == 0;
     }
-    ok = ok && p.in_use() == live.size() && h.a.check() == 0;
+    CHECK(ok);
   }
-  CHECK(ok);
 }
 
 TEST(pool_sizes_are_cut_to_what_offsets_can_reach) {

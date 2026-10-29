@@ -4,3 +4,5 @@ sdkconfig.old
 coverage.txt
 .vscode/
 .DS_Store
+CLAUDE.local.md
+.claude/settings.local.json

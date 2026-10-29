@@ -76,7 +76,12 @@ struct Rng {
 struct Buffer {
   void* raw;
   char* buf;
-  explicit Buffer(uint32_t len) : raw(std::malloc(len + 64)), buf(static_cast<char*>(raw) + (64 - reinterpret_cast<uintptr_t>(raw) % 64)) {}
+  explicit Buffer(uint32_t len) : raw(std::malloc(len + 64)), buf(static_cast<char*>(raw) + (64 - reinterpret_cast<uintptr_t>(raw) % 64)) {
+    if (!raw) {  // else the arena would be given memory at address 64
+      std::printf("  FAIL: no %u octets for a test heap\n", unsigned(len));
+      std::abort();
+    }
+  }
   ~Buffer() { std::free(raw); }
   Buffer(const Buffer&) = delete;
   Buffer& operator=(const Buffer&) = delete;

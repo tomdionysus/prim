@@ -11,6 +11,11 @@
 //
 // A pool is an Alloc too, for anything that allocates objects of one size:
 // a Trie's nodes, from a pool of Trie<V>::kNodeSize.
+//
+// No division at run time, which a core without a divide instruction would
+// make a library call: an object's index is its offset in the slab, an exact
+// multiple of the size, shifted by the size's power of two and multiplied by
+// the inverse of its odd part, modulo 2^32.
 
 #include <cstdint>
 #include <cstring>
@@ -66,9 +71,11 @@ class Pool final : public Alloc {
 
   Alloc* a_;
   Slab* s_ = nullptr;
+  uint32_t inv_;  // the inverse of size_'s odd part, modulo 2^32
   uint16_t size_;
   uint16_t per_;
   uint16_t off_;
+  uint8_t shift_;  // size_'s power of two
 };
 
 // ---- Implementation ----
@@ -86,6 +93,14 @@ inline Pool::Pool(Alloc& a, uint32_t size, uint32_t per_slab) : a_(&a) {
   size_ = uint16_t(size);
   per_ = uint16_t(per);
   off_ = uint16_t(offset_for(per));
+  // size is a multiple of 8: its odd part q, and q's inverse by Newton's
+  // method, each step doubling the bits that are right from the 3 that q has.
+  shift_ = 3;
+  while (!((size >> shift_) & 1)) ++shift_;
+  const uint32_t q = size >> shift_;
+  uint32_t x = q;
+  for (int k = 0; k < 4; ++k) x *= 2 - q * x;
+  inv_ = x;
 }
 
 inline Pool::~Pool() {
@@ -97,10 +112,16 @@ inline Pool::~Pool() {
 
 inline Pool::Slab** Pool::owner(const void* p, uint32_t* i) const {
   for (Slab* const* at = &s_; *at; at = &(*at)->next) {
+    // In the slab, then on an object: a whole multiple of the power of two
+    // whose product with the inverse is below per_, which it is only for an
+    // offset that is that index times the size.
     const uintptr_t off = reinterpret_cast<uintptr_t>(p) - reinterpret_cast<uintptr_t>(*at) - off_;
-    if (off < uintptr_t(per_) * size_ && off % size_ == 0) {
-      *i = uint32_t(off / size_);
-      return const_cast<Slab**>(at);
+    if (off < uintptr_t(per_) * size_) {
+      const uint32_t k = (uint32_t(off) >> shift_) * inv_;
+      if (!(off & ((1u << shift_) - 1)) && k < per_) {
+        *i = k;
+        return const_cast<Slab**>(at);
+      }
     }
   }
   return nullptr;
@@ -126,7 +147,7 @@ inline void* Pool::get() {
     s_ = s;
   }
   const uint32_t o = s->free;
-  const uint32_t i = (o - off_) / size_;
+  const uint32_t i = ((o - off_) >> shift_) * inv_;
   s->free = link(s, o);
   bits(s)[i / 8] |= uint8_t(1u << (i % 8));
   ++s->used;
