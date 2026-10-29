@@ -1,6 +1,7 @@
 # prim: to do
 
-In order.
+In order. What has been done is in `COMPLETE.md`; the plan for taking the
+library beyond the ESP32 is `PLAN-generalising.md`.
 
 1. **The suite on the boards.** It passes under ESP-IDF's QEMU as the V3,
    and the test app builds for all three boards. `target/run.sh <board>

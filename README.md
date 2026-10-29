@@ -2,7 +2,7 @@
 
 Version 0.1.0 (`CHANGELOG.md`).
 
-A header-only C++20 library of an allocator and the containers built on it,
+A header-only C++17 library of an allocator and the containers built on it,
 for 32-bit microcontrollers with little RAM and no heap worth fragmenting.
 Written for the ESP32-S3 and built and tested for the Heltec WiFi LoRa 32 V3
 and V4 and the LilyGO T-Deck; nothing in it is specific to a board. It takes
@@ -38,6 +38,7 @@ memory it is given and touches no peripheral.
 | `prim/sort.h` | `sort`, stable insertion sort |
 | `prim/siphash.h` | `halfsiphash`, `hash_seed`, `hash32`: HalfSipHash-2-4 |
 | `prim/secure.h` | `secure_zero`, clearing a secret |
+| `prim/bits.h` | `clz32`, `clz64`: leading zeros, the one thing asked of the machine |
 | `prim/assert.h` | `PRIM_ASSERT`, how misuse is reported |
 
 ## Installing
@@ -60,7 +61,7 @@ Then, in each component that uses it:
 
 The component carries only headers, so the code compiles in your own
 translation units at your own optimisation level. It needs ESP-IDF 5.x
-(built with 5.3.2) and C++20, ESP-IDF 5's default.
+(built with 5.3.2) and C++17 or later; ESP-IDF 5 compiles as C++20 by default.
 
 ### On the host
 
@@ -396,9 +397,12 @@ Every call that would corrupt a structure is refused, in every build: a
 pointer the arena did not give out, an object put in a container it is in,
 an index past the end, a pool object put back twice. To hear about it,
 compile the whole program with `-DPRIM_CHECKED`, and each refusal prints its
-file, line and condition and aborts. To log or count instead, define
-`PRIM_ASSERT(cond)` yourself before the first prim header, the same way in
-every file of the program.
+file, line and condition and aborts. To log, break into a debugger or count
+instead, compile it with `-DPRIM_ASSERT_HANDLER` as well and define
+`extern "C" void prim_assert_failed(const char* file, int line, const char*
+cond)` once in the program. To route a refusal some other way, define
+`PRIM_ASSERT(cond)` yourself before the first prim header. Whichever is
+chosen, every file of the program is compiled with the same.
 
 ### Secrets
 
@@ -897,11 +901,21 @@ past the free-list links written into its first words, until it is
 allocated and overwritten. A key, a plaintext or a password is cleared by
 its owner before it is freed.
 
+### `bits.h`: `clz32`, `clz64`
+
+Leading zeros of a nonzero word: the builtin under GCC and Clang, the
+intrinsic under IAR, else a portable version, `clz32_portable` and
+`clz64_portable`, which the tests check against the builtin at every bit
+position. The arena finds a size class with it and the trie the first bit
+two keys differ in. Nothing else in the library asks anything of the
+compiler.
+
 ### `assert.h`: `PRIM_ASSERT`
 
 `PRIM_ASSERT(cond)` is how each refusal is reported. It is nothing by
-default, prints and aborts under `PRIM_CHECKED`, and is yours to define
-otherwise (see "Checked builds").
+default, prints and aborts under `PRIM_CHECKED`, calls the program's
+`prim_assert_failed` under `PRIM_CHECKED` with `PRIM_ASSERT_HANDLER`, and is
+yours to define outright (see "Checked builds").
 
 ## Sizes
 
@@ -912,7 +926,7 @@ inside each object held.
 | --- | --- | --- |
 | `Arena` | 140 | 4 (a head) |
 | `Account` | 24 | |
-| `Pool` | 20 + slabs | 8 a slab, and a bit an object |
+| `Pool` | 24 + slabs | 8 a slab, and a bit an object |
 | `List` | 8 | 8 |
 | `Hash` | 20 + buckets | 4 |
 | `Tree` | 4 | 12 |
@@ -924,20 +938,21 @@ inside each object held.
 The library is headers, so a program carries the code of what it calls and
 nothing else. Measured in the test app, which uses every primitive, at `-Os`
 for the ESP32-S3 (ESP-IDF 5.3.2), the code that does not depend on an
-element type is 7,241 octets with everything used:
+element type is 6,244 octets with everything used. `ci/size.sh` measures
+it, and the same for each Cortex-M core, into `docs/sizes.md`:
 
 | Part | Octets |
 | --- | --- |
-| `Arena` | 2,322 |
-| `Trie` | 1,444 |
-| `Pool` | 846 |
-| `Tree` and the node functions | 804 |
-| `TimerQueue` | 428 |
-| HalfSipHash | 401 |
-| `Hash` | 375 |
-| `Account` | 247 |
-| `Ring` | 214 |
-| `Vec` | 160 |
+| `Arena` | 1,887 |
+| `Trie` | 886 |
+| `Pool` | 869 |
+| `Tree` and the node functions | 771 |
+| `TimerQueue` | 422 |
+| HalfSipHash | 365 |
+| `Hash` | 359 |
+| `Account` | 240 |
+| `Ring` | 255 |
+| `Vec` | 190 |
 
 Three things move these figures in a given program:
 
@@ -957,9 +972,12 @@ Data: 9 octets of bss (the hash key and whether it is set) and 4 of flash
     ./coverage.sh
     ./build/host/prim_soak [v3|v4]
     target/run.sh [heltec_v3|heltec_v4|tdeck] [port]
+    ci/host.sh       GCC and Clang, C++17 and C++20, sanitised
+    ci/arm.sh        Cortex-M0, M3, M7 and M33 under QEMU
+    ci/size.sh       code size by target, into docs/sizes.md
 
-The suite (`test/`, 71 cases) runs on the host under ASan and UBSan, and on
-the ESP32-S3. Each primitive has:
+The suite (`test/`, 73 cases) runs on the host under ASan and UBSan, on
+Cortex-M under QEMU, and on the ESP32-S3. Each primitive has:
 
 - a case for each operation, its edge cases, and growth and allocation that
   fail at each step (`check::Failing` fails the n-th call, or every call
@@ -984,7 +1002,7 @@ the ESP32-S3. Each primitive has:
 `coverage.sh` builds unoptimised with gcov, runs the suite and reports each
 header's lines and branches. A template is compiled into several files; a
 line counts as run, and a branch as taken, if any copy was. It fails unless
-every figure is 100%, which it is: 906 lines and 630 branches.
+every figure is 100%, which it is: 926 lines and 640 branches.
 
 The suite passes, with every warning an error, at -O0 to -O3 and -Os; at
 arena alignments of 8, 16, 32 and 64 (`-DPRIM_ARENA_ALIGN`); under seven
@@ -992,6 +1010,15 @@ seeds; and on the ESP32-S3 under ESP-IDF's QEMU, compiled for Xtensa, on
 ESP-IDF's C library, in a 96 KB arena. The S3 has a head layout of its own
 (capacities are 4 modulo 8 there, 0 on the host, and the flag bits share the
 word), which only that run exercises.
+
+`ci/arm.sh` runs the suite and the soak as bare-metal images
+(`target/arm/`) on QEMU's MPS2 machines, built with the Arm GNU toolchain
+and newlib, output by semihosting: for the Cortex-M3 on the AN385, the M7
+on the AN500 and the M33 on the AN505, and for the M0 on the AN385's M3,
+which runs ARMv6-M code unchanged. The M0 build has no divide or
+count-leading-zeros instruction to use, so it proves the library does
+without them: the pool divides only in its constructor. QEMU does not trap
+an unaligned access as an M0 would; UBSan on the host checks alignment.
 
 `prim_soak` (`bench/soak.cpp`) runs a simulated day of a node's memory:
 frames from a pool on timers, sessions coming and going in a table, a list

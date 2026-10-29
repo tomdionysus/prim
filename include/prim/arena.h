@@ -20,6 +20,7 @@
 
 #include "prim/alloc.h"
 #include "prim/assert.h"
+#include "prim/bits.h"
 
 #ifndef PRIM_ARENA_ALIGN
 #define PRIM_ARENA_ALIGN 8u  // a power of two of at least 8; a test build varies it
@@ -57,7 +58,7 @@ class Arena final : public Alloc {
   static uint32_t capacity_of(Word head) { return uint32_t((head & ~Word(7)) | kCapLow); }
   static Word pack(uint32_t cap) { return cap & ~Word(7); }  // a capacity as a head holds it, room for the flags
   static int bin_of(uint32_t cap) {
-    const int b = 27 - __builtin_clz(cap | 16u);  // log2 of the capacity, less 4, at least 0
+    const int b = 27 - clz32(cap | 16u);  // log2 of the capacity, less 4, at least 0
     return b < kBins ? b : kBins - 1;
   }
 

@@ -9,6 +9,7 @@
 //   prim_soak [v3|v4]     v3: 192 KB, all fast; v4 (default): 96 KB fast and 1.5 MB bulk
 
 #include <chrono>
+#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -137,7 +138,7 @@ int main(int argc, char** argv) {
 
     const uint64_t kTick = 100;                 // ms
     const uint64_t kDay = 24ull * 3600 * 1000;  // ms
-    std::printf("%s: fast %u KB, bulk %u KB, fast reserve %u\n", v3 ? "v3" : "v4", fast_len / 1024, bulk_len / 1024,
+    std::printf("%s: fast %" PRIu32 " KB, bulk %" PRIu32 " KB, fast reserve %" PRIu32 "\n", v3 ? "v3" : "v4", fast_len / 1024, bulk_len / 1024,
                 arena.fast_reserve());
     std::printf("%5s %8s %8s %6s %6s | %8s %8s %6s %6s | %5s %5s %6s %6s\n", "hour", "fastfree", "largest", "freeblk",
                 "class", "bulkfree", "largest", "freeblk", "class", "sess", "frame", "route", "fails");
@@ -210,7 +211,7 @@ int main(int argc, char** argv) {
       if (now % (3600 * 1000) == 0) {
         const prim::Stats f = arena.stats(Mem::Fast), b = arena.stats(Mem::Bulk);
         const Census cf = census(arena, Mem::Fast), cb = census(arena, Mem::Bulk);
-        std::printf("%5llu %8u %8u %6u %6u | %8u %8u %6u %6u | %5u %5u %6u %6u\n",
+        std::printf("%5llu %8" PRIu32 " %8" PRIu32 " %6" PRIu32 " %6" PRIu32 " | %8" PRIu32 " %8" PRIu32 " %6" PRIu32 " %6" PRIu32 " | %5" PRIu32 " %5" PRIu32 " %6" PRIu32 " %6" PRIu32 "\n",
                     (unsigned long long)(now / 3600000), f.free, f.largest, cf.blocks, cf.longest, b.free, b.largest,
                     cb.blocks, cb.longest, live_sessions, frames.in_use(), routes.size(), arena.failures());
         if (arena.check()) {
@@ -219,7 +220,7 @@ int main(int argc, char** argv) {
         }
       }
     }
-    std::printf("arena calls %llu, %.0f ns each; refused %u; fast least free %u, bulk least free %u\n",
+    std::printf("arena calls %llu, %.0f ns each; refused %" PRIu32 "; fast least free %" PRIu32 ", bulk least free %" PRIu32 "\n",
                 (unsigned long long)timed.calls, double(timed.ns) / double(timed.calls), refused,
                 arena.stats(Mem::Fast).least, arena.stats(Mem::Bulk).least);
     // Everything back.
@@ -231,7 +232,7 @@ int main(int argc, char** argv) {
     }
     }
     if (arena.used_bytes() || arena.check()) {
-      std::printf("left allocated: %u octets, check %d\n", arena.used_bytes(), arena.check());
+      std::printf("left allocated: %" PRIu32 " octets, check %d\n", arena.used_bytes(), arena.check());
       rc = 1;
     }
     std::printf("%s\n", rc ? "FAILED" : "passed");

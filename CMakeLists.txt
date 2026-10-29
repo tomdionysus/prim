@@ -10,6 +10,7 @@
 #
 #   cmake -S . -B build/host && cmake --build build/host && ./build/host/prim_tests
 #   ./coverage.sh             line and branch coverage of each header
+#   ci/host.sh                the suite under GCC and Clang, C++17 and C++20, sanitised
 #   ./build/host/prim_soak    a simulated day of a node's memory
 #   target/run.sh             the suite on the ESP32-S3, under QEMU or on a board
 
@@ -21,7 +22,7 @@ endif()
 cmake_minimum_required(VERSION 3.16)
 project(prim VERSION 0.1.0 LANGUAGES CXX)
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 20)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 option(PRIM_TESTS "Build the test suite, prim_tests, and the README's example" ON)
@@ -31,7 +32,7 @@ option(PRIM_SANITIZE "Build the tests under ASan and UBSan" OFF)
 add_library(prim INTERFACE)
 add_library(prim::prim ALIAS prim)
 target_include_directories(prim INTERFACE ${CMAKE_CURRENT_LIST_DIR}/include)
-target_compile_features(prim INTERFACE cxx_std_20)
+target_compile_features(prim INTERFACE cxx_std_17)
 
 if(PRIM_TESTS)
   set(PRIM_FLAGS -Wall -Wextra -Wpedantic -Werror -fno-exceptions -fno-rtti)
