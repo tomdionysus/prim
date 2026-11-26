@@ -16,7 +16,7 @@ set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd -P)
 build=${1:-$here/build/coverage}
 
-cmake -S "$here" -B "$build" -G Ninja -DPRIM_COVERAGE=ON >/dev/null
+cmake -S "$here" -B "$build" -G Ninja -DCMAKE_BUILD_TYPE=Debug -DPRIM_BUILD_TESTING=ON -DPRIM_COVERAGE=ON >/dev/null
 cmake --build "$build" >/dev/null
 find "$build" -name '*.gcda' -delete
 "$build/prim_tests" >/dev/null

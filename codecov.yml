@@ -1,0 +1,18 @@
+# The library's headers, uploaded by .github/workflows/ci.yml (ci/ci.sh
+# coverage). Informational: ./coverage.sh is the gate, at 100% of lines and
+# branches, and fails the coverage job itself.
+coverage:
+  status:
+    project:
+      default:
+        informational: true
+    patch:
+      default:
+        informational: true
+
+ignore:
+  - test/
+  - bench/
+  - ci/
+  - target/
+  - example.cpp

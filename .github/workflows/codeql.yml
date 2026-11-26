@@ -1,0 +1,54 @@
+#
+# prim - Storage Primitives
+#
+# Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+# SPDX-License-Identifier: MIT
+#
+# CodeQL security analysis of the library, through the suite, example and
+# soak that instantiate it.
+name: CodeQL
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+  schedule:
+    - cron: "41 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      security-events: write
+    container:
+      image: debian:trixie
+    steps:
+      - name: Install packages
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends g++ cmake ninja-build git ca-certificates
+
+      - uses: actions/checkout@v4
+
+      - name: Trust the checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: c-cpp
+          build-mode: manual
+          queries: security-and-quality
+
+      - name: Build
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPRIM_BUILD_TESTING=ON
+          cmake --build build -j "$(nproc)"
+
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:c-cpp"

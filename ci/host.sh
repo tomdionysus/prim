@@ -27,7 +27,8 @@ done
 for cc in "${compilers[@]}"; do
   for std in 17 20; do
     b=$root/host-$cc-$std
-    cmake -S "$here" -B "$b" -G Ninja -DCMAKE_CXX_COMPILER="$cc" -DCMAKE_CXX_STANDARD=$std -DPRIM_SANITIZE=ON >/dev/null
+    cmake -S "$here" -B "$b" -G Ninja -DCMAKE_CXX_COMPILER="$cc" -DCMAKE_CXX_STANDARD=$std \
+      -DPRIM_BUILD_TESTING=ON -DPRIM_WARNINGS_AS_ERRORS=ON -DPRIM_SANITIZE=ON >/dev/null
     cmake --build "$b" >"$b/build.log" 2>&1 || { echo "FAIL $cc -std=c++$std: build; see $b/build.log" >&2; grep -m5 -A3 "error" "$b/build.log" >&2; exit 1; }
     if ! "$b/prim_tests" >"$b/tests.log" 2>&1; then
       echo "FAIL $cc -std=c++$std: $(tail -1 "$b/tests.log")" >&2
@@ -42,7 +43,7 @@ for cc in "${compilers[@]}"; do
   done
 done
 
-flags=(-std=c++17 -I "$here/include" -DPRIM_CHECKED -Wall -Wextra -Wpedantic -Werror -fno-exceptions -fno-rtti)
+flags=(-std=c++17 -I "$here/include" -DPRIM_CHECKED -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wno-sign-conversion -Werror -fno-exceptions -fno-rtti)
 for cc in "${compilers[@]}"; do
   "$cc" "${flags[@]}" "$here/ci/checked.cpp" -o "$root/checked-$cc"
   out=$("$root/checked-$cc" 2>&1 || true)  # it aborts

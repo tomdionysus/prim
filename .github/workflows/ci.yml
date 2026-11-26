@@ -1,0 +1,136 @@
+#
+# prim - Storage Primitives
+#
+# Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+# SPDX-License-Identifier: MIT
+#
+# ci/ci.sh's steps on Debian 13: the header and format check; the host matrix
+# (GCC and Clang, C++17 and C++20, sanitised) on x86-64 and arm64; the
+# installed package's consumer; coverage to Codecov; the suite on Cortex-M
+# under QEMU. Then the test app built for each ESP32-S3 board and run under
+# ESP-IDF's QEMU, and a build and test on macOS. The boards themselves stay
+# by hand (target/run.sh <board> <port>).
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: ${{ matrix.step }} (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { step: check, arch: x86-64, runner: ubuntu-24.04 }
+          - { step: host, arch: x86-64, runner: ubuntu-24.04 }
+          - { step: host, arch: arm64, runner: ubuntu-24.04-arm }
+          - { step: package, arch: x86-64, runner: ubuntu-24.04 }
+          - { step: arm, arch: x86-64, runner: ubuntu-24.04 }
+    container:
+      image: debian:trixie
+      # LeakSanitizer needs ptrace to stop the process's threads.
+      options: --cap-add SYS_PTRACE --security-opt seccomp=unconfined
+    steps:
+      - name: Install packages
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            g++ clang clang-format cmake ninja-build git ca-certificates jq \
+            gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib qemu-system-arm
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # the release tags
+
+      - name: Trust the checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: ${{ matrix.step }}
+        run: ci/ci.sh ${{ matrix.step }}
+
+  coverage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    container:
+      image: debian:trixie
+    steps:
+      - name: Install packages
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            g++ cmake ninja-build git ca-certificates jq lcov \
+            curl gnupg  # Codecov's uploader verifies its own signature
+
+      - uses: actions/checkout@v4
+
+      - name: Trust the checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Every line and branch
+        run: ci/ci.sh coverage
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: build/ci/coverage.info
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
+  boards:
+    name: board (${{ matrix.board }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    container: espressif/idf:v5.3.2
+    strategy:
+      fail-fast: false
+      matrix:
+        board: [heltec_v3, heltec_v4, tdeck]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the test app
+        shell: bash
+        run: |
+          . "$IDF_PATH/export.sh"
+          cd target
+          idf.py @${{ matrix.board }}.args build
+
+  esp32s3-qemu:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    container: espressif/idf:v5.3.2
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: The suite on an ESP32-S3 under QEMU
+        shell: bash
+        run: |
+          python "$IDF_PATH/tools/idf_tools.py" install qemu-xtensa
+          ./target/run.sh heltec_v3
+
+  macos:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install packages
+        run: brew install ninja
+
+      - name: Build and test
+        run: |
+          cmake -S . -B build/macos -G Ninja -DPRIM_BUILD_TESTING=ON -DPRIM_WARNINGS_AS_ERRORS=ON
+          cmake --build build/macos
+          ./build/macos/prim_tests
+          ./build/macos/prim_example
+          ./build/macos/prim_soak v3 > /dev/null
+          ./build/macos/prim_soak v4 > /dev/null
