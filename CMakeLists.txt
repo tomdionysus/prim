@@ -97,7 +97,7 @@ if(PRIM_BUILD_TESTING)
   add_executable(prim_tests ${PRIM_TEST_SRC})
   target_link_libraries(prim_tests PRIVATE prim prim_warnings)
 
-  add_executable(prim_example ${PROJECT_SOURCE_DIR}/example.cpp)
+  add_executable(prim_example ${PROJECT_SOURCE_DIR}/examples/quick_start.cpp)
   target_link_libraries(prim_example PRIVATE prim prim_warnings)
 
   # A simulated day of a node's memory (bench/soak.cpp): prim_soak [v3|v4].
