@@ -43,7 +43,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y --no-install-recommends \
-            g++ clang clang-format cmake ninja-build git ca-certificates jq \
+            g++ clang libclang-rt-dev clang-format cmake ninja-build git ca-certificates jq \
             gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib qemu-system-arm
 
       - uses: actions/checkout@v4
