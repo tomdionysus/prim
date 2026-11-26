@@ -1,3 +1,9 @@
+#
+# prim - Storage Primitives
+#
+# Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+# SPDX-License-Identifier: MIT
+#
 # The test suite on the ESP32-S3: run.sh builds it for a board and runs it
 # under ESP-IDF's QEMU, or flashes it to a board given a port.
 #

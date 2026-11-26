@@ -1,3 +1,10 @@
+//
+// prim - Storage Primitives
+//
+// Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+// SPDX-License-Identifier: MIT
+//
+
 #pragma once
 
 // Clearing memory that held a secret. The arena does not clear what is

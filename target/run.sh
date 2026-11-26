@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 #
+# prim - Storage Primitives
+#
+# Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+# SPDX-License-Identifier: MIT
+#
 # The test suite on the ESP32-S3. Builds the test app for a board, then runs
 # it under ESP-IDF's QEMU (the default), or flashes it to a board and reads
 # its console. Fails unless the suite passes.

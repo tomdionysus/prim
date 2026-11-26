@@ -1,3 +1,10 @@
+//
+// prim - Storage Primitives
+//
+// Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+// SPDX-License-Identifier: MIT
+//
+
 #pragma once
 
 // Fixed-size objects from slabs. A slab is one allocation of a header, a bit

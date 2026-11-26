@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 #
+# prim - Storage Primitives
+#
+# Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+# SPDX-License-Identifier: MIT
+#
 # The host matrix: the suite, the README's example and the soak under GCC and
 # Clang, at C++17 and C++20, under ASan and UBSan; then the checked build
 # (assert.h), printing and aborting, and calling the program's own handler.

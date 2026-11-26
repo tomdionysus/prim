@@ -1,3 +1,10 @@
+//
+// prim - Storage Primitives
+//
+// Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+// SPDX-License-Identifier: MIT
+//
+
 #pragma once
 
 // Intrusive chained hash table. The link (one pointer) lives in the object,

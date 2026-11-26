@@ -1,3 +1,9 @@
+#
+# prim - Storage Primitives
+#
+# Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+# SPDX-License-Identifier: MIT
+#
 # prim: header-only storage primitives for the ESP32-S3 (README.md). No
 # dependencies.
 #

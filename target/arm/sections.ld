@@ -1,3 +1,10 @@
+/*
+ * prim - Storage Primitives
+ *
+ * Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+ * SPDX-License-Identifier: MIT
+ */
+
 /* The sections, for every machine: code and constants in FLASH, the rest in
    RAM, the heap from the end of .bss up to the stack at the top of RAM:
    newlib's _sbrk refuses to grow it past the stack pointer.

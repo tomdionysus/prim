@@ -1,3 +1,10 @@
+//
+// prim - Storage Primitives
+//
+// Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+// SPDX-License-Identifier: MIT
+//
+
 #pragma once
 
 // One queue of deadlines, on the red-black tree: a timer is a tree node and

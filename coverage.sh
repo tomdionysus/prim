@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 #
+# prim - Storage Primitives
+#
+# Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+# SPDX-License-Identifier: MIT
+#
 # Line and branch coverage of each primitive, from gcov, unoptimised. A
 # header's templates are compiled into several files: a line counts as run,
 # and a branch as taken, if any copy of it was. Prints each file's figures

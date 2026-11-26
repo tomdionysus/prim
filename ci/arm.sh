@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 #
+# prim - Storage Primitives
+#
+# Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+# SPDX-License-Identifier: MIT
+#
 # The suite and the soak on Cortex-M, under QEMU's MPS2 machines, as
 # bare-metal images with output by semihosting (target/arm/). For each core:
 # build, run, and pass only if QEMU exits 0, the suite reports no failures

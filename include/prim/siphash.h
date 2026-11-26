@@ -1,3 +1,10 @@
+//
+// prim - Storage Primitives
+//
+// Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+// SPDX-License-Identifier: MIT
+//
+
 #pragma once
 
 // HalfSipHash-2-4 with a 32-bit result (Aumasson and Bernstein; the

@@ -1,3 +1,10 @@
+//
+// prim - Storage Primitives
+//
+// Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+// SPDX-License-Identifier: MIT
+//
+
 // The checked build (assert.h). Built with -DPRIM_CHECKED, a refusal prints
 // "prim: file:line: condition" and aborts; with PRIM_ASSERT_HANDLER as well
 // it calls prim_assert_failed, which this file defines to count the call.

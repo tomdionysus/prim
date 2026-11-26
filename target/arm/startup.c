@@ -1,3 +1,10 @@
+//
+// prim - Storage Primitives
+//
+// Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+// SPDX-License-Identifier: MIT
+//
+
 // Bare-metal start for the suite and the soak under QEMU's MPS2 machines: a
 // vector table, a reset that zeroes .bss and runs the static constructors
 // (each TEST registers itself in one), then main with the command line QEMU

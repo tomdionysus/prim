@@ -1,3 +1,9 @@
+#
+# prim - Storage Primitives
+#
+# Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+# SPDX-License-Identifier: MIT
+#
 file(GLOB TESTS ${CMAKE_CURRENT_LIST_DIR}/../../test/*.cpp)
 # WHOLE_ARCHIVE: each test file is reached only through its static registrations,
 # which the linker would otherwise drop.

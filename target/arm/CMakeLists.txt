@@ -1,3 +1,9 @@
+#
+# prim - Storage Primitives
+#
+# Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+# SPDX-License-Identifier: MIT
+#
 # The suite as a bare-metal image for a Cortex-M machine under QEMU, with
 # output by semihosting (README in startup.c), and the soak beside it.
 # ci/arm.sh builds and runs both.

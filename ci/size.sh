@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 #
+# prim - Storage Primitives
+#
+# Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+# SPDX-License-Identifier: MIT
+#
 # Code size of each part of the library, by target, into docs/sizes.md: the
 # functions that do not depend on an element type, summed by symbol from
 # images that use every primitive, at -Os: the suite for each Cortex-M core

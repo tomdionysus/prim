@@ -1,3 +1,10 @@
+//
+// prim - Storage Primitives
+//
+// Copyright (C) 2026 Tom Cully <mail@tomcully.com>
+// SPDX-License-Identifier: MIT
+//
+
 // A simulated day of a node's memory: frames from a pool, sessions coming and
 // going in a table and a list with a timer each, buffers growing and being
 // dropped, and a routing trie whose nodes come from a pool. Every simulated
