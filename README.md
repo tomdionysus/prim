@@ -126,13 +126,14 @@ written for the ESP32-S3 and is tested on these, each by a script under
 
 | Platform | Script | Last pass |
 | --- | --- | --- |
-| Linux x86-64 and arm64, GCC and Clang, C++17 and C++20, ASan and UBSan | `ci/host.sh` | |
-| Cortex-M0, M3, M7 and M33, bare metal under QEMU | `ci/arm.sh` | |
-| ESP32-S3 under ESP-IDF's QEMU, as the Heltec V3 | `target/run.sh heltec_v3` | |
+| Linux arm64 (Debian 13), GCC and Clang, C++17 and C++20, ASan and UBSan | `ci/host.sh` | 2026-11-26, `5911363` |
+| Cortex-M0, M3, M7 and M33, bare metal under QEMU | `ci/arm.sh` | 2026-11-25, `5911363` |
+| ESP32-S3 under ESP-IDF's QEMU, as the Heltec V3 | `target/run.sh heltec_v3` | 2026-11-25, `5911363` |
 
 The test app also builds for the Heltec WiFi LoRa 32 V4 and the LilyGO
-T-Deck (`docs/boards.md`). Hosted CI runs all three on every push, and
-builds and runs the suite on macOS as well.
+T-Deck (`docs/boards.md`). Hosted CI runs all three on every push, the
+host matrix on x86-64 as well as arm64, and builds and runs the suite on
+macOS.
 
 ## Installing
 
