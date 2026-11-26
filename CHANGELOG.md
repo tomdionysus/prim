@@ -13,7 +13,30 @@
   log, break or count instead of printing and aborting.
 - `ci/host.sh`: the suite, example and soak under GCC and Clang at C++17 and
   C++20, sanitised, and the checked build's hook.
-- `CLAUDE.md`: the working rules.
+- `CONTRIBUTING.md`: the rules for a change. `CLAUDE.md` and
+  `basemind.toml` are no longer in the repository or its history.
+- Every source opens with a header block and an SPDX line; `.clang-format`
+  states the existing style, and the tree is formatted with it.
+- CMake: `PRIM_TESTS` is now `PRIM_BUILD_TESTING`, off by default, and
+  `PRIM_WARNINGS_AS_ERRORS` replaces the fixed `-Werror`. The tests,
+  examples and soak build with `-Wshadow` and `-Wconversion` as well. CMake
+  3.24 or later on the host.
+- `prim/version.h`: `PRIM_VERSION` and its parts. CMake refuses to configure
+  if it differs from `project()`.
+- Install and package: `find_package(prim 0.1 CONFIG)` gives `prim::prim`,
+  accepting the same minor version. Added with `add_subdirectory`, prim
+  builds and installs nothing of its own.
+- Hosted CI again (`ci/ci.sh`, `.github/`): the header, format and docs
+  check, the host matrix on x86-64 and arm64, the installed package, coverage
+  to Codecov, Cortex-M under QEMU, the board builds, the ESP32-S3 under QEMU,
+  macOS, and CodeQL.
+- Tests: a pointer at or past the top of an arena's memory is refused. Under
+  Debian 13's GCC 14 that branch of the bounds check was never taken, so
+  coverage stood at 639 of 640 branches.
+- Docs: the README says what prim is for; the guide, design, API, tests and
+  boards are in `docs/`. Their code is taken from `examples/` by line range,
+  and `ci/docs.sh` checks it. The ESP-IDF examples compile in the test app.
+- The release tag is `0.1.0`, not `v0.1.0`.
 - `sort` of fewer than two elements returns at once: it computed one past the
   end of an empty range, undefined, and of an empty `Vec`, a null pointer.
   Found by Clang's UBSan.

@@ -1,7 +1,38 @@
 # prim: to do
 
-In order. What has been done is in `COMPLETE.md`; the plan for taking the
-library beyond the ESP32 is `PLAN-generalising.md`.
+What has been done is in `COMPLETED.md`. The plan for taking the library
+beyond the ESP32 is `2026-10-26-generalising-plan.md`, drawn from
+`2026-10-26-generalising-note.md`.
+
+## Resume here
+
+The repository was brought to the 2026 group conventions on 2026-11-25, on
+`develop`: header blocks, `.clang-format`, the CMake options, install and
+package, `prim/version.h`, the hosted CI with Codecov and CodeQL, the docs
+split into `docs/` with their code from `examples/`, and `CONTRIBUTING.md`.
+History was rewritten to drop `CLAUDE.md` and `basemind.toml`, and the
+release tag is `0.1.0`. Next: push `main`, `develop` and the tag, then fill
+the README's table of runs from the first passing runs.
+
+## Decisions
+
+- Licence: MIT, not the stack's GPLv3. A GPLv3 header-only library would
+  bind every firmware built with it. Each file carries an SPDX line.
+- Dialect: the code's own. Google style at 120 columns, 2-space indent,
+  `.h` headers, `member_` and `kName`. `.clang-format` reproduces it.
+- C++17, no exceptions, no RTTI, no `std::` containers: the targets are
+  microcontrollers. The group's C++20, error and logging rules do not apply.
+- Tests use prim's own harness (`test/check.h`), not GoogleTest: the suite
+  runs bare-metal on a Cortex-M0 and on the ESP32-S3.
+- Hosted CI is back, for the badges and coverage; `ci/host.sh`,
+  `coverage.sh` and `ci/arm.sh` stay the local gates.
+
+## Waits on Tom
+
+- Push `main` (rewritten: a force push), `develop` and the tag `0.1.0`, and
+  delete `v0.1.0` on origin.
+
+## In order
 
 1. **The suite on the boards.** It passes under ESP-IDF's QEMU as the V3,
    and the test app builds for all three boards. `target/run.sh <board>
@@ -14,6 +45,9 @@ library beyond the ESP32 is `PLAN-generalising.md`.
 3. **A locked allocator.** An `Alloc` adaptor over a lock type with
    `lock()` and `unlock()`, so a program with several tasks allocating does
    not write its own; on the S3 a FreeRTOS mutex or a critical section.
+4. **The API reference from the headers.** `docs/api.md`'s declaration
+   blocks are summaries typed from the headers, not taken from them; the
+   rule that docs code comes from files does not yet hold there.
 
 ## Space, if measurements ask for it
 

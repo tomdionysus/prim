@@ -1,7 +1,7 @@
 # prim: plan for generalising beyond the ESP32
 
-26 October 2026. A working plan drawn from `prim-generalising-beyond-esp32.md`
-(the note), checked against the repository at `ea1ed4a`. The note is the
+26 October 2026. A working plan drawn from `2026-10-26-generalising-note.md`
+(the note), checked against the repository at `eeb7d49`. The note is the
 argument; this is the order of work, what each step must show, and where the
 note needed correcting. Items here that are also in `ACTIVE.md` are marked.
 
@@ -194,7 +194,7 @@ cleanly. The first day is lost to installing them if they do not.
 Dated, most recent first. A phase is done when its done-when line has been
 run and is recorded here.
 
-- 27 October 2026, on `ea1ed4a` plus the uncommitted phase 1 and 2 changes:
+- 27 October 2026, on `eeb7d49` plus the uncommitted phase 1 and 2 changes:
   **phase 2 done.** `ci/arm.sh` passes: 73 cases and the soak as the V3 and
   the V4 on the Cortex-M0, M3, M7 and M33 under QEMU 11.1, built with the Arm
   GNU toolchain 14.2.rel1. `docs/sizes.md` is generated. `ci/host.sh`,
@@ -221,7 +221,7 @@ run and is recorded here.
     heap could not be had, and the soak printed `uint32_t` with `%u`. Both
     fixed.
 
-- 26 October 2026, on `ea1ed4a` plus the uncommitted phase 1 changes:
+- 26 October 2026, on `eeb7d49` plus the uncommitted phase 1 changes:
   **phase 1 done.** `ci/host.sh` passes: 73 cases, the example and both soaks
   under GCC 16 and Clang 21 at C++17 and C++20 with ASan and UBSan fatal, and
   the checked build both ways. `./coverage.sh` is at 100% lines and branches.
