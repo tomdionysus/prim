@@ -6,13 +6,13 @@ beyond the ESP32 is `2026-10-26-generalising-plan.md`, drawn from
 
 ## Resume here
 
-The repository was brought to the 2026 group conventions on 2026-11-25, on
-`develop`: header blocks, `.clang-format`, the CMake options, install and
-package, `prim/version.h`, the hosted CI with Codecov and CodeQL, the docs
-split into `docs/` with their code from `examples/`, and `CONTRIBUTING.md`.
-History was rewritten to drop `CLAUDE.md` and `basemind.toml`, and the
-release tag is `0.1.0`. Next: push `main`, `develop` and the tag, then fill
-the README's table of runs from the first passing runs.
+0.2.0 was released on 2026-11-26: the repository at the 2026 group
+conventions (header blocks, `.clang-format`, the CMake options, install
+and package, `prim/version.h`, the hosted CI with Codecov and CodeQL, the
+docs in `docs/` with their code from `examples/`, `CONTRIBUTING.md`).
+History was rewritten without `CLAUDE.md` and `basemind.toml` and force
+pushed; the tags are `0.1.0` and `0.2.0`. Next: check the first hosted CI
+run, which is the first on x86-64 Linux, then item 1 below.
 
 ## Decisions
 
@@ -29,8 +29,7 @@ the README's table of runs from the first passing runs.
 
 ## Waits on Tom
 
-- Push `main` (rewritten: a force push), `develop` and the tag `0.1.0`, and
-  delete `v0.1.0` on origin.
+- Nothing.
 
 ## In order
 

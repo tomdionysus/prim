@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.2.0
+
 - C++17 is the floor: `cxx_std_17`, and the host build defaults to it. The
   ESP-IDF test app stays at the IDF default.
 - `bits.h`: `clz32` and `clz64`, the builtin under GCC and Clang, the IAR
@@ -23,7 +25,7 @@
   3.24 or later on the host.
 - `prim/version.h`: `PRIM_VERSION` and its parts. CMake refuses to configure
   if it differs from `project()`.
-- Install and package: `find_package(prim 0.1 CONFIG)` gives `prim::prim`,
+- Install and package: `find_package(prim 0.2 CONFIG)` gives `prim::prim`,
   accepting the same minor version. Added with `add_subdirectory`, prim
   builds and installs nothing of its own.
 - Hosted CI again (`ci/ci.sh`, `.github/`): the header, format and docs

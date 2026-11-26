@@ -3,7 +3,7 @@
 Items that were on the list and have been done, most recent first, with the
 commit that did each. What remains is in `ACTIVE.md`.
 
-## Unreleased
+## 0.2.0 (26 November 2026)
 
 - **The 2026 group conventions (2026-11-25).** Header blocks and SPDX
   lines, `.clang-format`, `PRIM_BUILD_TESTING` and

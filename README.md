@@ -13,7 +13,7 @@ that heap. It is header-only C++17 with no dependencies, no exceptions, no
 RTTI and no `std::` containers, and about 6 KB of code with every primitive
 in use (`docs/sizes.md`).
 
-Version 0.1.0 (`CHANGELOG.md`).
+Version 0.2.0 (`CHANGELOG.md`).
 
 ## What it is for
 
@@ -165,7 +165,7 @@ Or install it and find it as a package:
 
     cmake -S . -B build && cmake --install build --prefix /usr/local
 
-    find_package(prim 0.1 CONFIG REQUIRED)
+    find_package(prim 0.2 CONFIG REQUIRED)
     target_link_libraries(app PRIVATE prim::prim)
 
 While prim is 0.x the package accepts the same minor version only.

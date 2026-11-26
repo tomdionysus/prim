@@ -12,7 +12,7 @@
 # project's components/, and REQUIRES prim.
 #
 # On the host it is an interface library, `prim` (alias prim::prim): build it
-# standalone, add_subdirectory it, or install it and find_package(prim 0.1 CONFIG).
+# standalone, add_subdirectory it, or install it and find_package(prim 0.2 CONFIG).
 #
 #   cmake -S . -B build/host -DPRIM_BUILD_TESTING=ON -DPRIM_WARNINGS_AS_ERRORS=ON
 #   cmake --build build/host && ./build/host/prim_tests
@@ -28,7 +28,7 @@ if(ESP_PLATFORM)
 endif()
 
 cmake_minimum_required(VERSION 3.24)
-project(prim VERSION 0.1.0 LANGUAGES CXX)
+project(prim VERSION 0.2.0 LANGUAGES CXX)
 
 # include/prim/version.h is what a program sees; it must say what project() says.
 file(STRINGS ${PROJECT_SOURCE_DIR}/include/prim/version.h PRIM_VERSION_LINE REGEX "^#define PRIM_VERSION \"")
