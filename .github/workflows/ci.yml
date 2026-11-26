@@ -78,7 +78,7 @@ jobs:
         run: ci/ci.sh coverage
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           files: build/ci/coverage.info
           disable_search: true
