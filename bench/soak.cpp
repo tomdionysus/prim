@@ -180,13 +180,13 @@ int main(int argc, char** argv) {
             lru.push_front(*s);
             ++live_sessions;
             s->fire = [](prim::Timer& t) {
-              Session* s = &static_cast<Session&>(static_cast<prim::TimerHook<Expiry>&>(t));
-              g_by_id->remove(*s);
-              prim::List<Session>::remove(*s);
+              Session* self = &static_cast<Session&>(static_cast<prim::TimerHook<Expiry>&>(t));
+              g_by_id->remove(*self);
+              prim::List<Session>::remove(*self);
               prim::Alloc& a = *g_timed;
-              s->buf->~Vec();
-              a.free(s->buf);
-              a.free(s);
+              self->buf->~Vec();
+              a.free(self->buf);
+              a.free(self);
               --*g_live;
             };
             timers.arm(*s, now + 60000 * (5 + rng.below(26)));

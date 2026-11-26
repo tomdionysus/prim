@@ -305,6 +305,19 @@ TEST(arena_bad_frees_and_absurd_sizes_are_refused) {
   CHECK_EQ(s.a.check(), 0);
 }
 
+TEST(arena_a_pointer_at_or_past_the_top_of_its_memory_is_refused) {
+  check::Buffer b(2048);
+  Arena a;
+  a.add(b.buf, 1024);
+  void* sentinel = b.buf + 1024;  // the payload the sentinel head would have
+  void* past = b.buf + 1024 + A;  // aligned, and beyond the area altogether
+  CHECK_ASSERTS(2, a.free(sentinel); a.free(past));
+  CHECK_EQ(a.size_of(sentinel), 0u);
+  CHECK_EQ(a.size_of(past), 0u);
+  CHECK_EQ(a.bad_frees(), 2u);
+  CHECK_EQ(a.check(), 0);
+}
+
 // ---------------------------------------------------------------- merging, checking, churn
 
 TEST(arena_a_free_merges_with_either_neighbour_or_both) {
