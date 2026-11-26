@@ -50,13 +50,14 @@ static int board_memory() {
   // esp_ptr_external_ram is the chip's own word on where a pointer lies.
   if (f && esp_ptr_external_ram(f)) ++bad, std::printf("prim: FAIL fast block is in PSRAM\n");
   if (b && bulk && !esp_ptr_external_ram(b)) ++bad, std::printf("prim: FAIL bulk block is not in PSRAM\n");
-  if (b && !bulk && esp_ptr_external_ram(b)) ++bad, std::printf("prim: FAIL bulk block is in PSRAM on a board without it\n");
+  if (b && !bulk && esp_ptr_external_ram(b))
+    ++bad, std::printf("prim: FAIL bulk block is in PSRAM on a board without it\n");
 
   // A bulk arena, if there is one, should hold a block almost its size.
   const prim::Stats sb = a.stats(prim::Mem::Bulk);
   const prim::Stats sf = a.stats(prim::Mem::Fast);
-  std::printf("prim: fast %u free (largest %u), bulk %u free (largest %u)\n", unsigned(sf.free),
-              unsigned(sf.largest), unsigned(sb.free), unsigned(sb.largest));
+  std::printf("prim: fast %u free (largest %u), bulk %u free (largest %u)\n", unsigned(sf.free), unsigned(sf.largest),
+              unsigned(sb.free), unsigned(sb.largest));
   if (bulk && sb.largest < bulk_len - 4096) ++bad, std::printf("prim: FAIL bulk area lost to overhead\n");
 
   a.free(f);

@@ -152,7 +152,7 @@ TEST(arena_pmalloc_realloc_no_space_left) {
   void* a = s.a.alloc(2048);
   void* b = s.a.alloc(1024);
   CHECK(a && b && s.a.free_bytes() == 0);
-  CHECK(s.a.resize(b, 2048) == nullptr);  // the sentinel after it, nowhere else
+  CHECK(s.a.resize(b, 2048) == nullptr);                // the sentinel after it, nowhere else
   CHECK_EQ(s.a.size_of(b), Arena::capacity_for(1024));  // left as it was
   CHECK_EQ(s.a.check(), 0);
 }
@@ -235,11 +235,11 @@ TEST(arena_too_small_or_absurd_areas_are_ignored) {
   check::Buffer b(256);
   Arena a;
   a.add(nullptr, 1024);
-  a.add(b.buf, M + A - 1);                                 // one short of a block and its sentinel
-  a.add(b.buf + 1, A - 1);                                 // nothing once aligned
-  a.add(b.buf + A - 1, 2);                                 // its end before its first head
-  a.add(reinterpret_cast<void*>(~uintptr_t(0) - 8), 64);   // wraps the address space
-  a.add(reinterpret_cast<void*>(~uintptr_t(0) - 4), 2);    // no room to align at the top of it
+  a.add(b.buf, M + A - 1);                                // one short of a block and its sentinel
+  a.add(b.buf + 1, A - 1);                                // nothing once aligned
+  a.add(b.buf + A - 1, 2);                                // its end before its first head
+  a.add(reinterpret_cast<void*>(~uintptr_t(0) - 8), 64);  // wraps the address space
+  a.add(reinterpret_cast<void*>(~uintptr_t(0) - 4), 2);   // no room to align at the top of it
   CHECK(a.free_bytes() == 0 && a.blocks() == 0);
   CHECK(a.alloc(1) == nullptr);
 }
@@ -304,7 +304,7 @@ TEST(arena_a_free_merges_with_either_neighbour_or_both) {
   Small s(4096);
   void* m[4];
   for (auto& x : m) x = s.a.alloc(64);  // m0 m1 m2 m3, then the rest
-  s.a.free(m[2]);                      // neither neighbour free: on the list by itself
+  s.a.free(m[2]);                       // neither neighbour free: on the list by itself
   CHECK_EQ(s.a.blocks(), 5u);
   s.a.free(m[3]);  // both free: m2, m3 and the rest become one
   CHECK_EQ(s.a.blocks(), 3u);
@@ -317,7 +317,7 @@ TEST(arena_a_free_merges_with_either_neighbour_or_both) {
   void* c = s.a.alloc(64);  // a b c, then the rest
   s.a.free(c);              // the rest after it only
   CHECK_EQ(s.a.blocks(), 3u);
-  void* big = s.a.alloc(1000);          // from the head of that block: a b big, the rest
+  void* big = s.a.alloc(1000);         // from the head of that block: a b big, the rest
   CHECK(s.a.resize(big, 100) == big);  // the rest given back merges with the free rest after it
   CHECK_EQ(s.a.blocks(), 4u);
   s.a.free(a);  // nothing before, b after: by itself
@@ -373,9 +373,9 @@ TEST(arena_check_finds_each_kind_of_damage) {
         *after(rest) = Arena::kUsed;
         break;
       }
-      case 8: *after(second) |= Arena::kPrevUsed, want = 6; break;                       // the next block's mark
+      case 8: *after(second) |= Arena::kPrevUsed, want = 6; break;                        // the next block's mark
       case 9: second->head = Arena::pack(M - H - A) | Arena::kPrevUsed, want = 2; break;  // too small for a block
-      case 10: second->head -= 8, want = 2; break;                                       // not a block's size
+      case 10: second->head -= 8, want = 2; break;                                        // not a block's size
       case 11: {  // m3 cut to the smallest block behind a false sentinel: now in the wrong class
         const uint32_t c = M - H;
         first->head = Arena::pack(c) | (first->head & Arena::kPrevUsed);
@@ -456,7 +456,7 @@ TEST(arena_a_board_with_only_fast_memory_ignores_the_kind) {
   CHECK_EQ(h.a.stats(prim::Mem::Fast).used, 2 * Arena::capacity_for(100));
   CHECK_EQ(h.a.failures(), 0u);
   CHECK_EQ(h.a.largest_free(), h.a.stats(prim::Mem::Fast).largest);  // the one kind's is the whole's
-  CHECK(h.a.resize(p, 5000) != nullptr);  // moved, within the one kind
+  CHECK(h.a.resize(p, 5000) != nullptr);                             // moved, within the one kind
   CHECK_EQ(h.a.check(), 0);
 }
 
@@ -487,7 +487,7 @@ TEST(account_gives_a_container_its_kind_and_counts_what_its_owner_holds) {
   CHECK(cold.resize(q, 0xFFFFFFFFu) == nullptr);  // refused: nothing changes
   CHECK_EQ(cold.objects(), 2u);
   cold.free(q);
-  CHECK_ASSERTS(1, cold.free(q));                 // a bad free counts nothing
+  CHECK_ASSERTS(1, cold.free(q));  // a bad free counts nothing
   cold.free(nullptr);
   CHECK(cold.objects() == 1 && cold.bytes() == a.size_of(u.begin()));
   CHECK(cold.peak() > cold.bytes());

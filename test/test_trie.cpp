@@ -24,12 +24,12 @@ TEST(trie_each_operation) {
   Route r[6] = {{0}, {1}, {2}, {3}, {4}, {5}};
   CHECK(!t.match(0) && !t.remove(0, 0) && !t.exact(0, 0));
   CHECK(t.insert(top(0b1010, 4), 4, r[1]));
-  CHECK(t.insert(top(0b10, 2), 2, r[2]));     // above it
-  CHECK(t.insert(top(0b1011, 4), 4, r[3]));   // beside it: a junction at 3 bits
-  CHECK(t.insert(top(0b101, 3), 3, r[4]));    // at the junction itself
-  CHECK(!t.insert(top(0b101, 3), 3, r[5]));   // held already
-  CHECK(t.insert(0, 0, r[0]));                // the default
-  CHECK(t.insert(~0ull, 64, r[5]));           // a full-length key
+  CHECK(t.insert(top(0b10, 2), 2, r[2]));    // above it
+  CHECK(t.insert(top(0b1011, 4), 4, r[3]));  // beside it: a junction at 3 bits
+  CHECK(t.insert(top(0b101, 3), 3, r[4]));   // at the junction itself
+  CHECK(!t.insert(top(0b101, 3), 3, r[5]));  // held already
+  CHECK(t.insert(0, 0, r[0]));               // the default
+  CHECK(t.insert(~0ull, 64, r[5]));          // a full-length key
   CHECK_EQ(t.size(), 6u);
   CHECK_EQ(t.match(top(0b1010, 4) | 1), &r[1]);
   CHECK_EQ(t.match(top(0b1011, 4)), &r[3]);
@@ -134,10 +134,10 @@ TEST(trie_lookups_that_stop_short) {
   Route r{1};
   CHECK(t.insert(top(0b1, 1), 1, r));
   CHECK(t.insert(top(0b111, 3), 3, r));
-  CHECK(!t.exact(top(0b01, 2), 2));    // parts from 0b1 on the way down
+  CHECK(!t.exact(top(0b01, 2), 2));  // parts from 0b1 on the way down
   CHECK(!t.remove(top(0b01, 2), 2));
-  CHECK(!t.exact(top(0b11, 2), 2));    // stops at 0b111: longer
-  CHECK(!t.exact(top(0b110, 3), 3));   // stops at 0b111: the same length, another key
+  CHECK(!t.exact(top(0b11, 2), 2));   // stops at 0b111: longer
+  CHECK(!t.exact(top(0b110, 3), 3));  // stops at 0b111: the same length, another key
   CHECK(!t.remove(top(0b110, 3), 3));
   CHECK_EQ(t.exact(top(0b111, 3), 3), &r);
 }
@@ -147,7 +147,7 @@ TEST(trie_replace_swaps_a_held_value_only) {
   prim::Trie<Route> t(h.a);
   Route r1{1}, r2{2};
   CHECK(t.insert(top(0b10, 2), 2, r1));
-  CHECK(t.insert(top(0b1011, 4), 4, r1));  // a junction at 3 bits above it
+  CHECK(t.insert(top(0b1011, 4), 4, r1));   // a junction at 3 bits above it
   CHECK(!t.replace(top(0b11, 2), 2, r2));   // not held
   CHECK(!t.replace(top(0b101, 3), 3, r2));  // a junction is not held
   CHECK(!t.replace(0, 65, r2));

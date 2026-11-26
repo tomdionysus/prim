@@ -21,8 +21,8 @@ inline int clz32_portable(uint32_t x) {
   x |= x >> 4;
   x |= x >> 8;
   x |= x >> 16;
-  static constexpr uint8_t kTop[32] = {0,  9,  1,  10, 13, 21, 2,  29, 11, 14, 16, 18, 22, 25, 3,  30,
-                                        8,  12, 20, 28, 15, 17, 24, 7,  19, 27, 23, 6,  26, 5,  4,  31};
+  static constexpr uint8_t kTop[32] = {0, 9,  1,  10, 13, 21, 2,  29, 11, 14, 16, 18, 22, 25, 3, 30,
+                                       8, 12, 20, 28, 15, 17, 24, 7,  19, 27, 23, 6,  26, 5,  4, 31};
   return 31 - kTop[(x * 0x07C4ACDDu) >> 27];
 }
 inline int clz64_portable(uint64_t x) {

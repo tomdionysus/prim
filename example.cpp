@@ -10,7 +10,7 @@
 
 // A session: on a list of sessions, in a table by peer address, with a
 // timer. Each container's link is inside the object, through a hook.
-struct ByAddr;   // tags, so one object can be in several containers
+struct ByAddr;  // tags, so one object can be in several containers
 struct Expiry;
 struct Session : prim::ListHook<>, prim::HashHook<ByAddr>, prim::TimerHook<Expiry> {
   uint32_t addr;
@@ -37,7 +37,7 @@ int main() {
   // kind of memory and counted to it.
   prim::Account sessions_mem(arena, prim::Mem::Fast);
 
-  prim::List<Session> all;                                 // allocates nothing
+  prim::List<Session> all;                                           // allocates nothing
   prim::Hash<Session, SessionByAddr, ByAddr> by_addr(sessions_mem);  // buckets from the account
   prim::TimerQueue timers;
 
@@ -49,11 +49,11 @@ int main() {
   };
 
   all.push_back(s);
-  by_addr.insert(s);          // false only if there are no buckets at all
-  timers.arm(s, 1000);        // deadline in the caller's units
+  by_addr.insert(s);    // false only if there are no buckets at all
+  timers.arm(s, 1000);  // deadline in the caller's units
 
   if (Session* found = by_addr.find(0x0A000001)) ++found->packets;
-  timers.run(1000);           // fires s, which is now disarmed
+  timers.run(1000);  // fires s, which is now disarmed
   by_addr.remove(s);
   prim::List<Session>::remove(s);
 

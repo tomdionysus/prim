@@ -1,6 +1,6 @@
 #include <algorithm>
-#include <utility>
 #include <deque>
+#include <utility>
 #include <vector>
 
 #include "check.h"
@@ -26,7 +26,8 @@ TEST(vec_each_operation) {
   CHECK_EQ(v[0], 50);
   v.erase_swap(4);  // the last itself
   CHECK_EQ(v.size(), 4u);
-  CHECK_EQ(v.lower_bound(25, [](int a, int k) { return a < k; }), 3u);  // over 50 15 20 30: not sorted, still a bisection
+  CHECK_EQ(v.lower_bound(25, [](int a, int k) { return a < k; }),
+           3u);  // over 50 15 20 30: not sorted, still a bisection
   v.clear();
   CHECK(v.empty());
   prim::Vec<int> none(h.a, 0);
@@ -140,9 +141,9 @@ TEST(pool_each_operation) {
     CHECK_EQ(p.slabs(), 3u);
     CHECK_EQ(p.in_use(), 9u);
     int stranger = 0;
-    CHECK(!p.put(&stranger));                         // not ours
-    CHECK(!p.put(static_cast<char*>(o[0]) + 1));      // inside an object, not at one
-    for (int i = 0; i < 4; ++i) CHECK(p.put(o[i]));   // the first slab made, now at the back, empties and goes
+    CHECK(!p.put(&stranger));                        // not ours
+    CHECK(!p.put(static_cast<char*>(o[0]) + 1));     // inside an object, not at one
+    for (int i = 0; i < 4; ++i) CHECK(p.put(o[i]));  // the first slab made, now at the back, empties and goes
     CHECK_EQ(p.slabs(), 2u);
     for (int i = 4; i < 9; ++i) CHECK(p.put(o[i]));
     CHECK_EQ(p.slabs(), 1u);  // the last stays
@@ -179,7 +180,8 @@ TEST(pool_random_against_std) {
       } else {
         const uint32_t i = rng.below(uint32_t(live.size()));
         unsigned char* o = live[i];
-        for (uint32_t j = 0; j < size; ++j) ok = ok && o[j] == static_cast<unsigned char>(reinterpret_cast<uintptr_t>(o) + j);
+        for (uint32_t j = 0; j < size; ++j)
+          ok = ok && o[j] == static_cast<unsigned char>(reinterpret_cast<uintptr_t>(o) + j);
         // Inside the object, which no other slab can reach: never an object.
         const uint32_t in = 1 + rng.below(size - 1);
         ok = ok && !p.put(o + in) && p.size_of(o + in) == 0 && p.size_of(o) == size;
@@ -217,8 +219,8 @@ TEST(pool_a_slab_given_back_to_comes_first) {
   void* b = p.get();  // the first slab, full
   void* c = p.get();  // a second, in front of it
   CHECK(p.slabs() == 2 && a && b && c);
-  CHECK(p.put(a));            // the first slab has room again: to the front
-  CHECK(p.get() == a);        // and the next get finds it there, not by making a third
+  CHECK(p.put(a));      // the first slab has room again: to the front
+  CHECK(p.get() == a);  // and the next get finds it there, not by making a third
   CHECK_EQ(p.slabs(), 2u);
   for (void* x : {a, b, c}) CHECK(p.put(x));
   CHECK_EQ(p.slabs(), 1u);
@@ -236,8 +238,10 @@ TEST(sort_is_stable_and_matches_std) {
     std::vector<std::pair<int, int>> v(rng.below(64));
     for (uint32_t i = 0; i < v.size(); ++i) v[i] = {int(rng.below(8)), int(i)};  // few keys: many equal
     std::vector<std::pair<int, int>> o = v;
-    prim::sort(v.data(), v.data() + v.size(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) { return a.first < b.first; });
-    std::stable_sort(o.begin(), o.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) { return a.first < b.first; });
+    prim::sort(v.data(), v.data() + v.size(),
+               [](const std::pair<int, int>& a, const std::pair<int, int>& b) { return a.first < b.first; });
+    std::stable_sort(o.begin(), o.end(),
+                     [](const std::pair<int, int>& a, const std::pair<int, int>& b) { return a.first < b.first; });
     ok = v == o;
   }
   CHECK(ok);

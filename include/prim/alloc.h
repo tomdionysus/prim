@@ -31,9 +31,9 @@ struct Stats {
 
 struct Alloc {
   virtual void* alloc(uint32_t n, Mem want = Mem::Bulk) = 0;  // nullptr when it cannot
-  virtual void* resize(void* p, uint32_t n) = 0;             // nullptr when it cannot, p left as it was
-  virtual void free(void* p) = 0;                            // nullptr is ignored
-  virtual uint32_t size_of(const void* p) const = 0;         // the block's capacity; 0 if p is not allocated
+  virtual void* resize(void* p, uint32_t n) = 0;              // nullptr when it cannot, p left as it was
+  virtual void free(void* p) = 0;                             // nullptr is ignored
+  virtual uint32_t size_of(const void* p) const = 0;          // the block's capacity; 0 if p is not allocated
   virtual Stats stats(Mem kind) const = 0;
 
  protected:

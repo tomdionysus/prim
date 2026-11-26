@@ -20,7 +20,7 @@ class VecCore {
  protected:
   VecCore(Alloc& a, uint16_t max) : a_(&a), max_(max) {}
   ~VecCore() { a_->free(d_); }
-  void* open(uint32_t i, uint32_t esz);              // room at i; nullptr when full or out of memory
+  void* open(uint32_t i, uint32_t esz);             // room at i; nullptr when full or out of memory
   void close(uint32_t i, uint32_t esz, bool swap);  // removes i: shifting what follows, or moving the last in
 
   Alloc* a_;

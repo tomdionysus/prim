@@ -54,14 +54,14 @@ TEST(arena_refuses_pointers_it_did_not_give_out) {
     *at = was;
     ++bad;
   };
-  damaged(y, head_of(y), *head_of(y) | Arena::kFast);                    // marked fast, in bulk memory
+  damaged(y, head_of(y), *head_of(y) | Arena::kFast);                               // marked fast, in bulk memory
   damaged(y, head_of(y), Arena::pack(0x100000) | Arena::kUsed | Arena::kPrevUsed);  // reaching past the memory
-  damaged(y, head_of(z), *head_of(z) & ~Arena::kPrevUsed);              // the next block does not know it
-  damaged(x, head_of(x), *head_of(x) & ~Arena::kPrevUsed);              // a free block before the first
-  a.free(y);                                                            // now z has a free block before it
-  damaged(z, head_of(z) - 1, Word(0x100000));                           // a foot reaching out of the memory
+  damaged(y, head_of(z), *head_of(z) & ~Arena::kPrevUsed);                          // the next block does not know it
+  damaged(x, head_of(x), *head_of(x) & ~Arena::kPrevUsed);                          // a free block before the first
+  a.free(y);                                                                        // now z has a free block before it
+  damaged(z, head_of(z) - 1, Word(0x100000));                                       // a foot reaching out of the memory
   damaged(z, head_of(z) - 1, Word(Arena::capacity_for(64) + H + Arena::capacity_for(64)));  // a foot to x, allocated
-  damaged(z, head_of(z) - 1, Word(Arena::capacity_for(64) - A));        // a foot to no block's capacity
+  damaged(z, head_of(z) - 1, Word(Arena::capacity_for(64) - A));  // a foot to no block's capacity
   CHECK_EQ(a.bad_frees(), bad);
   CHECK_EQ(a.check(), 0);
   for (void* p : {x, z, w}) a.free(p);
@@ -79,7 +79,7 @@ TEST(arena_keeps_a_fast_reserve_from_bulk_requests) {
   CHECK_EQ(a.fast_reserve(), all - 512);
   void* p = a.alloc(256);  // bulk, met from fast: the reserve still stands
   CHECK(p != nullptr);
-  CHECK(a.alloc(512) == nullptr);  // would cut into the reserve: refused, and counted
+  CHECK(a.alloc(512) == nullptr);       // would cut into the reserve: refused, and counted
   CHECK(a.alloc(1u << 20) == nullptr);  // more than there is at all
   CHECK_EQ(a.failures(), 2u);
   void* q = a.alloc(512, Mem::Fast);  // fast itself may use it
@@ -128,7 +128,7 @@ TEST(list_refuses_what_would_corrupt_it) {
   Node a, b, c;
   l.push_back(a);
   CHECK_ASSERTS(1, l.push_back(a));
-  CHECK_ASSERTS(1, m.push_front(a));    // on another list
+  CHECK_ASSERTS(1, m.push_front(a));       // on another list
   CHECK_ASSERTS(1, l.insert_after(b, c));  // b is on no list
   CHECK_ASSERTS(1, l.insert_after(a, a));  // a is on one
   CHECK_ASSERTS(1, prim::List<Node>::remove(b));
@@ -160,7 +160,7 @@ TEST(vec_and_ring_refuse_indexes_past_the_end) {
   CHECK_ASSERTS(1, v.erase(2));
   CHECK_ASSERTS(1, v.erase_swap(7));
   CHECK_EQ(v.size(), 2u);
-  CHECK_ASSERTS(1, (void)v[2]);  // within the capacity, past the size
+  CHECK_ASSERTS(1, (void)v[2]);        // within the capacity, past the size
   CHECK(v.insert(2, 3) && v[2] == 3);  // at the end itself is a push
   prim::Ring<int> r(h.a, 8, false);
   r.push(1);
@@ -176,7 +176,7 @@ TEST(pool_refuses_an_object_put_back_twice) {
   void* x = p.get();
   void* y = p.get();
   CHECK(p.put(x));
-  CHECK(!p.put(x));  // twice
+  CHECK(!p.put(x));                              // twice
   void* never = static_cast<char*>(y) + 3 * 32;  // an object of the slab that was never got
   CHECK(!p.put(never));
   void* g1 = p.get();
@@ -192,7 +192,7 @@ TEST(pool_is_an_allocator) {
   void* x = a.alloc(20);
   CHECK(x && a.size_of(x) == 24);
   CHECK(a.alloc(25) == nullptr);  // more than an object
-  CHECK(a.resize(x, 24) == x);     // in place, within the size
+  CHECK(a.resize(x, 24) == x);    // in place, within the size
   CHECK(a.resize(x, 25) == nullptr);
   int stranger = 0;
   CHECK(a.resize(&stranger, 8) == nullptr);
@@ -318,14 +318,14 @@ struct Seen {
 prim::Timer *g_x, *g_late;
 void probe(prim::Timer&) {
   ++g_fires;
-  g_seen.next1 = g_q->next();   // b, pending, is earlier than anything in the tree
-  g_seen.due0 = g_q->due(0);    // nothing due by 0
+  g_seen.next1 = g_q->next();  // b, pending, is earlier than anything in the tree
+  g_seen.due0 = g_q->due(0);   // nothing due by 0
   g_q->arm(*g_x, 0);
-  g_seen.next2 = g_q->next();   // the tree now has something earlier
-  g_seen.due1 = g_q->due(5);    // and that comes first
-  g_seen.due2 = g_q->due(5);    // then b, pending
+  g_seen.next2 = g_q->next();  // the tree now has something earlier
+  g_seen.due1 = g_q->due(5);   // and that comes first
+  g_seen.due2 = g_q->due(5);   // then b, pending
   g_q->cancel(*g_late);
-  g_seen.due3 = g_q->due(10);   // c, pending, with the tree empty
+  g_seen.due3 = g_q->due(10);  // c, pending, with the tree empty
 }
 }  // namespace
 
@@ -359,7 +359,7 @@ TEST(secure_zero_clears) {
 }
 
 TEST(pool_slabs_are_cut_by_their_bits_too) {
-  check::Heap h;  // one slab of up to 64 KB
+  check::Heap h;                // one slab of up to 64 KB
   prim::Pool p(h.a, 8, 10000);  // the bits for 8,191 objects push the slab past 16-bit offsets
   CHECK(p.per_slab() < 8191u && p.per_slab() > 8000u);
   void* x = p.get();
@@ -371,10 +371,10 @@ TEST(arena_least_free_is_never_a_moment_inside_a_call) {
   Arena a;
   a.add(b.buf, 65536);
   void* p = a.alloc(100);
-  void* q = a.resize(p, 50);     // the rest given back, merged with the free space after it
-  void* r = a.resize(q, 3000);   // grown in place over all of that, the rest given back again
+  void* q = a.resize(p, 50);    // the rest given back, merged with the free space after it
+  void* r = a.resize(q, 3000);  // grown in place over all of that, the rest given back again
   CHECK(r == p);
   const prim::Stats s = a.stats(prim::Mem::Bulk);
-  CHECK_EQ(s.least, s.free);     // the least there has been is what is free now, not zero
+  CHECK_EQ(s.least, s.free);  // the least there has been is what is free now, not zero
   a.free(r);
 }

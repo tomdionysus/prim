@@ -32,8 +32,8 @@ class TimerQueue {
   void arm(Timer& t, uint64_t at);  // re-arms a timer already armed, or taken out by run() and not yet fired
   void cancel(Timer& t);            // a timer not armed is left alone
   static bool armed(const Timer& t) { return rb_linked(&t); }
-  uint64_t next() const;            // the earliest deadline, or kNever
-  Timer* due(uint64_t now);         // the earliest timer due by now, disarmed; else nullptr
+  uint64_t next() const;     // the earliest deadline, or kNever
+  Timer* due(uint64_t now);  // the earliest timer due by now, disarmed; else nullptr
   // Every timer due by now, earliest first, each disarmed then fired (one
   // without fire is only disarmed); a fire may arm or cancel any timer, and
   // may call run() itself. Returns how many this call fired.

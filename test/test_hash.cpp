@@ -43,9 +43,9 @@ using ByIdTable = prim::Hash<Obj, IdTr, ById>;
 
 TEST(siphash_matches_the_reference_vectors) {
   // vectors_hsip32 of github.com/veorq/SipHash: key 00..07, message 00..len-1.
-  static const uint32_t want[16] = {
-      0x5b9f35a9, 0xb85a4727, 0x03a662fa, 0x04e7fe8a, 0x89466e2a, 0x69b6fac5, 0x23fc6358, 0xc563cf8b,
-      0x8f84b8d0, 0x79e706f8, 0x3479b094, 0x50300808, 0x2f87f057, 0xff63e677, 0x7cf8ffd6, 0x972bfe74};
+  static const uint32_t want[16] = {0x5b9f35a9, 0xb85a4727, 0x03a662fa, 0x04e7fe8a, 0x89466e2a, 0x69b6fac5,
+                                    0x23fc6358, 0xc563cf8b, 0x8f84b8d0, 0x79e706f8, 0x3479b094, 0x50300808,
+                                    0x2f87f057, 0xff63e677, 0x7cf8ffd6, 0x972bfe74};
   uint8_t key[8], msg[64];
   for (int i = 0; i < 8; ++i) key[i] = uint8_t(i);
   for (int i = 0; i < 64; ++i) msg[i] = uint8_t(i);
@@ -176,7 +176,7 @@ TEST(hash_random_against_std) {
 
 TEST(hash_several_objects_may_share_a_key) {
   check::Heap h;
-  Obj o[5];  // before the table, so they outlive it: its destructor lets them go
+  Obj o[5];                                 // before the table, so they outlive it: its destructor lets them go
   prim::Hash<Obj, CollideTr, ById> t(h.a);  // one bucket: other keys sit between
   for (int i = 0; i < 5; ++i) {
     o[i].id = uint64_t(i % 2);  // ids 0 1 0 1 0

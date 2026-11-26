@@ -26,8 +26,8 @@ struct RbRoot {
 bool rb_linked(const RbNode* n);
 void rb_insert(RbRoot& t, RbNode* n, RbNode* parent, int side);  // n becomes parent's child on side
 void rb_erase(RbRoot& t, RbNode* n);
-RbNode* rb_end(const RbRoot& t, int d);    // the first (d 0) or last (d 1)
-RbNode* rb_step(const RbNode* n, int d);   // the next (d 1) or previous (d 0)
+RbNode* rb_end(const RbRoot& t, int d);   // the first (d 0) or last (d 1)
+RbNode* rb_step(const RbNode* n, int d);  // the next (d 1) or previous (d 0)
 
 template <class Tag = void>
 struct RbHook : RbNode {};

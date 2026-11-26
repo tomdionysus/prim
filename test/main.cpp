@@ -12,7 +12,8 @@ int prim_run(const char* only) {
     const int asserted = check::asserts() - check::claimed();
     c->fn();
     if (check::asserts() - check::claimed() != asserted) {
-      std::printf("  FAIL %s: %d assertion(s) it did not expect\n", c->name, check::asserts() - check::claimed() - asserted);
+      std::printf("  FAIL %s: %d assertion(s) it did not expect\n", c->name,
+                  check::asserts() - check::claimed() - asserted);
       check::claimed() = check::asserts();
       ++check::failures();
     }

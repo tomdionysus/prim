@@ -76,7 +76,8 @@ struct Rng {
 struct Buffer {
   void* raw;
   char* buf;
-  explicit Buffer(uint32_t len) : raw(std::malloc(len + 64)), buf(static_cast<char*>(raw) + (64 - reinterpret_cast<uintptr_t>(raw) % 64)) {
+  explicit Buffer(uint32_t len)
+      : raw(std::malloc(len + 64)), buf(static_cast<char*>(raw) + (64 - reinterpret_cast<uintptr_t>(raw) % 64)) {
     if (!raw) {  // else the arena would be given memory at address 64
       std::printf("  FAIL: no %u octets for a test heap\n", unsigned(len));
       std::abort();
@@ -112,14 +113,14 @@ struct Failing final : prim::Alloc {
 
 }  // namespace check
 
-#define TEST(name)                                     \
-  static void name();                                  \
-  static ::check::Reg check_reg_##name(#name, name);   \
+#define TEST(name)                                   \
+  static void name();                                \
+  static ::check::Reg check_reg_##name(#name, name); \
   static void name()
 
-#define CHECK(cond)                                          \
-  do {                                                       \
-    if (!(cond)) ::check::fail(__FILE__, __LINE__, #cond);   \
+#define CHECK(cond)                                        \
+  do {                                                     \
+    if (!(cond)) ::check::fail(__FILE__, __LINE__, #cond); \
   } while (0)
 
 #define CHECK_EQ(a, b) CHECK((a) == (b))

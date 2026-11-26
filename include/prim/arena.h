@@ -84,7 +84,7 @@ class Arena final : public Alloc {
   uint32_t used_bytes() const { return used_[0] + used_[1]; }
   uint32_t largest_free() const;
   uint32_t blocks() const { return blocks_; }   // allocated and free
-  uint32_t bad_frees() const { return bad_; }    // a free or resize of what is not allocated
+  uint32_t bad_frees() const { return bad_; }   // a free or resize of what is not allocated
   uint32_t failures() const { return fails_; }  // allocations refused for want of memory
   const Free* free_list(Mem kind, int bin) const { return avail_[kind == Mem::Fast][bin]; }
 
@@ -204,8 +204,8 @@ inline void Arena::add(void* p, uint32_t n, Mem k) {
 
 inline Arena::Word* Arena::valid(const void* p) const {
   const Word x = reinterpret_cast<Word>(p) - kH;  // where its head would be
-  if ((x + kH) & (kA - 1)) return nullptr;         // not a payload's alignment
-  if (!in(x, 0) && !in(x, 1)) return nullptr;      // not in memory the arena was given
+  if ((x + kH) & (kA - 1)) return nullptr;        // not a payload's alignment
+  if (!in(x, 0) && !in(x, 1)) return nullptr;     // not in memory the arena was given
   Word* h = reinterpret_cast<Word*>(x);
   const int k = kind(h);
   if (!(*h & kUsed) || !in(x, k)) return nullptr;  // not allocated, or marked the other kind
@@ -359,18 +359,18 @@ inline int Arena::check() const {
     for (int b = 0; b < kBins; ++b) {
       const Free* prev = nullptr;
       for (const Free* f = avail_[k][b]; f; prev = f, f = f->next) {
-        const Word at = reinterpret_cast<Word>(f);  // tested before anything in it is read
+        const Word at = reinterpret_cast<Word>(f);           // tested before anything in it is read
         if (((at + kH) & (kA - 1)) || !in(at, k)) return 1;  // out of alignment, or outside its memory
         Word* h = hd(f);
         if ((*h & kUsed) || cap(h) + kH < kMin) return 2;  // marked used, or too small for a block
-        if constexpr (kA > 8) {                              // at 8, every capacity is a block's size
+        if constexpr (kA > 8) {                            // at 8, every capacity is a block's size
           if ((cap(h) + kH) & (kA - 1)) return 2;
         }
-        if (kind(h) != k) return 3;                                // on the other kind's list
-        if (f->prev != prev) return 4;                             // a broken back link
-        if (!(*after(h) & kUsed)) return 5;                        // a free block after it, not merged
-        if (*foot(h) != cap(h) || (*after(h) & kPrev)) return 6;   // the foot, or the next block's mark, wrong
-        if (bin_of(cap(h)) != b) return 8;                         // in the wrong class
+        if (kind(h) != k) return 3;                               // on the other kind's list
+        if (f->prev != prev) return 4;                            // a broken back link
+        if (!(*after(h) & kUsed)) return 5;                       // a free block after it, not merged
+        if (*foot(h) != cap(h) || (*after(h) & kPrev)) return 6;  // the foot, or the next block's mark, wrong
+        if (bin_of(cap(h)) != b) return 8;                        // in the wrong class
         listed += cap(h);
       }
     }

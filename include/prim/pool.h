@@ -67,7 +67,8 @@ class Pool final : public Alloc {
     return *reinterpret_cast<uint16_t*>(static_cast<char*>(slab) + off);
   }
   static uint8_t* bits(Slab* s) { return reinterpret_cast<uint8_t*>(s + 1); }
-  Slab** owner(const void* p, uint32_t* i) const;  // the link to p's slab, and p's index; nullptr if p is no object here
+  // The link to p's slab, and p's index; nullptr if p is no object here.
+  Slab** owner(const void* p, uint32_t* i) const;
 
   Alloc* a_;
   Slab* s_ = nullptr;

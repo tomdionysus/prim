@@ -31,11 +31,12 @@ class TrieCore {
 
   bool insert(uint64_t key, uint8_t len, void* val);  // false if held already, or out of memory
   void* remove(uint64_t key, uint8_t len);            // the value it held, or nullptr
-  void* replace(uint64_t key, uint8_t len, void* val);  // the value it held, now val; nullptr, nothing done, if not held
+  // The value it held, now val; nullptr, and nothing done, if not held.
+  void* replace(uint64_t key, uint8_t len, void* val);
   void* exact(uint64_t key, uint8_t len) const;
-  void* match(uint64_t key) const;                    // the longest prefix holding key
-  uint32_t size() const { return n_; }                // prefixes
-  uint32_t nodes() const { return nodes_; }           // prefixes and junctions
+  void* match(uint64_t key) const;           // the longest prefix holding key
+  uint32_t size() const { return n_; }       // prefixes
+  uint32_t nodes() const { return nodes_; }  // prefixes and junctions
 
  private:
   static uint64_t mask(uint8_t len) { return len ? ~uint64_t(0) << (64 - len) : 0; }

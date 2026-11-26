@@ -63,17 +63,10 @@ inline uint32_t halfsiphash(const void* in, uint32_t len, const uint8_t key[8]) 
   // The last word: what is left, with the length on top.
   uint32_t m = len << 24;
   switch (len & 3) {
-    case 3:
-      m |= uint32_t(p[whole + 2]) << 16;
-      [[fallthrough]];
-    case 2:
-      m |= uint32_t(p[whole + 1]) << 8;
-      [[fallthrough]];
-    case 1:
-      m |= uint32_t(p[whole]);
-      break;
-    default:
-      break;
+    case 3: m |= uint32_t(p[whole + 2]) << 16; [[fallthrough]];
+    case 2: m |= uint32_t(p[whole + 1]) << 8; [[fallthrough]];
+    case 1: m |= uint32_t(p[whole]); break;
+    default: break;
   }
   v[3] ^= m;
   detail::rounds(v, 2);
