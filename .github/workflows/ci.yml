@@ -132,5 +132,6 @@ jobs:
           cmake --build build/macos
           ./build/macos/prim_tests
           ./build/macos/prim_example
+          ./build/macos/prim_modules
           ./build/macos/prim_soak v3 > /dev/null
           ./build/macos/prim_soak v4 > /dev/null

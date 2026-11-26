@@ -49,7 +49,7 @@ if(PROJECT_IS_TOP_LEVEL)
   endif()
 endif()
 
-option(PRIM_BUILD_TESTING "Build the suite, prim_tests, the README's example and the soak" OFF)
+option(PRIM_BUILD_TESTING "Build the suite, prim_tests, the examples and the soak" OFF)
 option(PRIM_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 option(PRIM_COVERAGE "Build the tests for gcov, unoptimised" OFF)
 option(PRIM_SANITIZE "Build the tests under ASan and UBSan" OFF)
@@ -97,8 +97,11 @@ if(PRIM_BUILD_TESTING)
   add_executable(prim_tests ${PRIM_TEST_SRC})
   target_link_libraries(prim_tests PRIVATE prim prim_warnings)
 
+  # The code the docs show (examples/, ci/docs.sh), built and run as programs.
   add_executable(prim_example ${PROJECT_SOURCE_DIR}/examples/quick_start.cpp)
   target_link_libraries(prim_example PRIVATE prim prim_warnings)
+  add_executable(prim_modules ${PROJECT_SOURCE_DIR}/examples/modules.cpp)
+  target_link_libraries(prim_modules PRIVATE prim prim_warnings)
 
   # A simulated day of a node's memory (bench/soak.cpp): prim_soak [v3|v4].
   add_executable(prim_soak ${PROJECT_SOURCE_DIR}/bench/soak.cpp)

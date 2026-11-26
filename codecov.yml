@@ -15,4 +15,4 @@ ignore:
   - bench/
   - ci/
   - target/
-  - example.cpp
+  - examples/

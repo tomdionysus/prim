@@ -9,8 +9,9 @@
 # container; .github/workflows/ci.yml runs each as its own job. The steps
 # call the same scripts a local run does.
 #
-#   ci/ci.sh check      the header block on every source, clang-format, and
-#                       version.h against the release tag
+#   ci/ci.sh check      the header block on every source, clang-format, the
+#                       docs' code against examples/ (ci/docs.sh), and the
+#                       version against the release tag
 #   ci/ci.sh host       ci/host.sh: GCC and Clang, C++17 and C++20, sanitised
 #   ci/ci.sh package    install, then build and run a consumer (test/package)
 #   ci/ci.sh coverage   ./coverage.sh's 100% gate; lcov report build/ci/coverage.info
@@ -39,6 +40,7 @@ case "$step" in
     done
     [ "$missing" = 0 ]
     git ls-files '*.h' '*.cpp' '*.c' | xargs clang-format --dry-run -Werror
+    "$top/ci/docs.sh"
     tag=$(git describe --exact-match --tags HEAD 2>/dev/null || true)
     if [ -n "$tag" ] && [ "$tag" != "$version" ]; then
       echo "HEAD is tagged $tag but CMakeLists.txt says $version" >&2

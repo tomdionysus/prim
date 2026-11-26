@@ -37,6 +37,7 @@ for cc in "${compilers[@]}"; do
     fi
     cases=$(tail -1 "$b/tests.log")
     "$b/prim_example"
+    "$b/prim_modules"
     "$b/prim_soak" v3 >/dev/null
     "$b/prim_soak" v4 >/dev/null
     echo "ok   $cc -std=c++$std sanitised: $cases; example; soak v3 and v4"
